@@ -1,0 +1,5004 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#003399" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>StarryFlameSPH</title>
+
+    <style>
+      :root {
+        --bg: #fff;
+        --pn: #fff;
+        --pn2: #f2f2f2;
+        --bd: #808080;
+        --bd2: #c0c0c0;
+        --fg: #000;
+        --mut: #444;
+        --ac: #0000aa;
+        --hd: #003399;
+        --btn: #d4d0c8;
+        --warn: #cc0000;
+        --ok: #006600;
+        --r: 0;
+        --mono: "Courier New", Courier, monospace;
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          12px/1.4 Verdana,
+          Arial,
+          Helvetica,
+          sans-serif;
+        min-height: 100vh;
+        padding: 10px;
+        padding-left: calc(10px + env(safe-area-inset-left, 0px));
+        padding-right: calc(10px + env(safe-area-inset-right, 0px));
+        padding-top: calc(10px + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .hd {
+        margin-bottom: 10px;
+        padding-bottom: 4px;
+        border-bottom: 3px double var(--hd);
+      }
+      .hd h1 {
+        margin: 0;
+        font:
+          bold 22px Arial,
+          Helvetica,
+          sans-serif;
+        color: var(--hd);
+      }
+      .beta {
+        font:
+          bold 11px Arial,
+          sans-serif;
+        vertical-align: super;
+        margin-left: 4px;
+        color: var(--warn);
+      }
+      .content-grid {
+        display: grid;
+        grid-template-columns: 290px minmax(0, 1fr);
+        gap: 10px;
+        margin-bottom: 10px;
+        align-items: start;
+      }
+      .info-panel,
+      .controls,
+      .canvas-container {
+        background: var(--pn);
+        border: 2px groove var(--bd2);
+      }
+      .info-panel,
+      .controls {
+        padding: 8px;
+        min-width: 0;
+      }
+      .info-panel h3,
+      .grp {
+        font:
+          bold 12px Arial,
+          Helvetica,
+          sans-serif;
+        color: #fff;
+        background: var(--hd);
+        padding: 2px 6px;
+      }
+      .info-panel h3 {
+        margin: 0 0 4px;
+      }
+      .info-panel h3:not(:first-child) {
+        margin-top: 10px;
+      }
+      .info-table {
+        font-size: 12px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 2px 4px;
+        border-bottom: 1px solid #ddd;
+      }
+      .info-row:nth-child(even) {
+        background: #eef2ff;
+      }
+      .info-label {
+        color: var(--mut);
+      }
+      .info-value {
+        text-align: right;
+        font-family: var(--mono);
+        font-weight: bold;
+        color: var(--ac);
+      }
+      .info-row.warn .info-value {
+        color: var(--warn);
+      }
+      .info-panel select {
+        margin-bottom: 4px;
+      }
+      .canvas-container {
+        background: #000;
+        border: 2px inset var(--bd2);
+        overflow: hidden;
+      }
+      #cv {
+        width: 100%;
+        height: 68vh;
+        min-height: 340px;
+        max-height: 780px;
+        display: block;
+        touch-action: none;
+        cursor: crosshair;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 10px;
+        align-items: center;
+        padding: 6px 8px;
+        border-top: 2px groove var(--bd2);
+        background: var(--btn);
+      }
+      .bar .f {
+        flex: 1 1 200px;
+        margin: 0;
+      }
+      .bar button {
+        min-width: 76px;
+      }
+      button,
+      select,
+      input[type="text"],
+      input:not([type]) {
+        height: 24px;
+        font:
+          12px Verdana,
+          Arial,
+          sans-serif;
+        color: var(--fg);
+      }
+      button {
+        padding: 0 12px;
+        background: var(--btn);
+        border: 2px outset #f0f0f0;
+        border-radius: 0;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #e4e0d8;
+      }
+      button:active {
+        border-style: inset;
+      }
+      button.p {
+        font-weight: bold;
+        color: var(--ac);
+      }
+      select,
+      input[type="text"],
+      input:not([type]) {
+        padding: 0 4px;
+        background: #fff;
+        border: 2px inset #c0c0c0;
+        border-radius: 0;
+        width: 100%;
+        min-width: 0;
+      }
+      input[type="text"],
+      input:not([type]) {
+        font-family: var(--mono);
+      }
+      .tabs {
+        display: flex;
+        gap: 2px;
+        border-bottom: 1px solid var(--bd);
+        overflow-x: auto;
+        margin: 0 0 10px;
+        padding: 0 4px;
+      }
+      .tab {
+        flex: none;
+        height: 24px;
+        padding: 0 12px;
+        background: var(--btn);
+        border: 1px solid var(--bd);
+        border-bottom: 0;
+        border-radius: 0;
+        color: var(--ac);
+        text-decoration: underline;
+        position: relative;
+        top: 1px;
+      }
+      .tab:hover {
+        background: #e4e0d8;
+      }
+      .tab.on {
+        background: #fff;
+        color: #000;
+        font-weight: bold;
+        text-decoration: none;
+        height: 26px;
+        top: 1px;
+      }
+      .tp[hidden] {
+        display: none;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 10px 20px;
+      }
+      .grid > * {
+        min-width: 0;
+      }
+      .full {
+        grid-column: 1/-1;
+      }
+      .grp {
+        grid-column: 1/-1;
+        margin: 4px 0 0;
+      }
+      .grid > .grp:first-child,
+      .tp > .grp:first-child {
+        margin-top: 0;
+      }
+      .f label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2px;
+        color: #000;
+      }
+      b {
+        font: bold 12px var(--mono);
+        color: var(--ac);
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 12px;
+        align-items: center;
+      }
+      .ck {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+      }
+      input[type="checkbox"] {
+        width: 13px;
+        height: 13px;
+      }
+      .opts {
+        grid-column: 1/-1;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2px 20px;
+      }
+      .opts .ck {
+        align-items: flex-start;
+        padding: 2px 0;
+      }
+      .opts .ck input {
+        margin-top: 2px;
+        flex: none;
+      }
+      .opts .ck span {
+        flex: 1;
+        min-width: 0;
+      }
+      .actions {
+        grid-column: 1/-1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      input[type="range"] {
+        width: 100%;
+        height: 20px;
+        margin: 0;
+      }
+      .fg {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .fg canvas {
+        width: 100%;
+        border: 2px inset var(--bd2);
+        background: #000;
+        cursor: pointer;
+      }
+      .ob {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        border-bottom: 1px solid #ddd;
+      }
+      .ob span {
+        flex: 1;
+        min-width: 0;
+      }
+      .ob i {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 3px solid;
+        flex: none;
+      }
+      .ob button {
+        padding: 0 8px;
+      }
+      .ob em {
+        display: block;
+        font-style: normal;
+        color: var(--mut);
+      }
+      .lb {
+        position: fixed;
+        inset: 0;
+        background: #000d;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        z-index: 9;
+        color: #fff;
+        font-size: 12px;
+      }
+      .lb[hidden] {
+        display: none;
+      }
+      .lb img {
+        max-width: 92vw;
+        max-height: 82vh;
+        border: 2px solid #fff;
+      }
+      .hint {
+        color: var(--mut);
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+      .grid > .hint {
+        margin: 0;
+      }
+      details.adv {
+        border-top: 1px solid var(--bd2);
+        padding-top: 6px;
+      }
+      details.adv summary {
+        cursor: pointer;
+        color: var(--ac);
+        margin-bottom: 8px;
+      }
+      small {
+        color: var(--mut);
+        font-size: 11px;
+      }
+      a {
+        color: var(--ac);
+      }
+      @media (max-width: 900px) {
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+        .canvas-col {
+          order: -1;
+        }
+        #cv {
+          height: 52vh;
+          min-height: 300px;
+        }
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 6px;
+        }
+        .opts {
+          grid-template-columns: 1fr;
+        }
+        .bar button {
+          min-width: 0;
+          flex: 1;
+        }
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      body {
+        overflow-x: hidden;
+      }
+      #cv {
+        height: 68vh;
+        height: 68dvh;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      @media (min-width: 1600px) {
+        .container {
+          max-width: 1800px;
+        }
+        .content-grid {
+          grid-template-columns: 340px minmax(0, 1fr);
+        }
+      }
+      @media (min-width: 901px) and (max-width: 1100px) {
+        .content-grid {
+          grid-template-columns: 240px minmax(0, 1fr);
+        }
+      }
+      @media (max-width: 900px) {
+        #cv {
+          height: 56vh;
+          height: 56dvh;
+          min-height: 300px;
+        }
+      }
+      @media (max-width: 600px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .hd h1 {
+          font-size: 18px;
+        }
+        #cv {
+          height: 52vh;
+          height: 52dvh;
+          min-height: 280px;
+        }
+        .tabs {
+          margin-left: -8px;
+          margin-right: -8px;
+        }
+      }
+      @media (max-height: 500px) and (orientation: landscape) {
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+        .canvas-col {
+          order: -1;
+        }
+        #cv {
+          height: calc(100vh - 90px);
+          height: calc(100dvh - 90px);
+          min-height: 220px;
+          max-height: none;
+        }
+      }
+      @media (pointer: coarse) {
+        button,
+        select,
+        input[type="text"],
+        input:not([type]) {
+          height: 40px;
+          font-size: 16px;
+        }
+        .tab {
+          height: 40px;
+        }
+        .tab.on {
+          height: 42px;
+        }
+        input[type="checkbox"] {
+          width: 20px;
+          height: 20px;
+        }
+        input[type="range"] {
+          height: 34px;
+        }
+        .bar button {
+          min-width: 88px;
+        }
+        .opts .ck {
+          padding: 6px 0;
+        }
+        .ob button {
+          height: 36px;
+        }
+      }
+
+      .hd {
+        border-bottom: 2px solid var(--hd);
+      }
+      .info-panel,
+      .controls,
+      .canvas-container,
+      .fg canvas {
+        border: 1px solid #b8bec9;
+      }
+      .canvas-container {
+        border-color: #8a93a3;
+      }
+      .info-panel h3,
+      .grp {
+        background: #eaf0fb;
+        color: var(--hd);
+        border-left: 3px solid var(--hd);
+      }
+      .info-row {
+        border-bottom: 1px solid #e6e9ef;
+      }
+      .bar {
+        border-top: 1px solid #b8bec9;
+        background: #f4f6fa;
+      }
+      button {
+        background: #eef1f6;
+        border: 1px solid #b8bec9;
+        color: #111;
+      }
+      button:hover {
+        background: #e0e7f2;
+        border-color: var(--hd);
+      }
+      button:active {
+        background: #cfd9ea;
+        border-style: solid;
+      }
+      button.p {
+        background: var(--hd);
+        border-color: var(--hd);
+        color: #fff;
+        font-weight: bold;
+      }
+      button.p:hover {
+        background: #0a4ac0;
+      }
+      select,
+      input[type="text"],
+      input:not([type]) {
+        border: 1px solid #b8bec9;
+        background: #fff;
+      }
+      select:focus,
+      input:focus {
+        border-color: var(--hd);
+        outline: none;
+      }
+      .tabs {
+        border-bottom: 1px solid #b8bec9;
+        padding: 0;
+      }
+      .tab {
+        background: none;
+        border: 0;
+        border-bottom: 3px solid transparent;
+        color: #333;
+        text-decoration: none;
+        top: 0;
+        font-weight: bold;
+      }
+      .tab:hover {
+        background: #eef1f6;
+      }
+      .tab.on {
+        background: none;
+        color: var(--hd);
+        border-bottom-color: var(--hd);
+        text-decoration: none;
+      }
+      .lb img {
+        border: 0;
+      }
+
+      /* uniform type and controls */
+      :root {
+        --fs: 12px;
+        --fam: Verdana, Geneva, Arial, sans-serif;
+        --h: 28px;
+      }
+      @media (pointer: coarse) {
+        :root {
+          --fs: 16px;
+          --h: 40px;
+        }
+      }
+      body * {
+        font-family: var(--fam) !important;
+        font-size: var(--fs) !important;
+      }
+      .hd h1 {
+        font-size: calc(var(--fs) * 1.5) !important;
+      }
+      .beta {
+        vertical-align: baseline !important;
+        font-size: var(--fs) !important;
+      }
+      button,
+      select,
+      input[type="text"],
+      input:not([type]),
+      .tab,
+      .tab.on {
+        height: var(--h) !important;
+      }
+      button,
+      select,
+      input[type="text"],
+      input:not([type]) {
+        padding: 0 10px;
+      }
+      select {
+        padding-right: 6px;
+      }
+      .info-panel,
+      .controls {
+        padding: 10px;
+      }
+      .content-grid {
+        gap: 10px;
+      }
+      .grid {
+        gap: 10px 16px;
+      }
+      .info-row {
+        padding: 3px 4px;
+      }
+      input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+      }
+      @media (pointer: coarse) {
+        input[type="checkbox"] {
+          width: 20px;
+          height: 20px;
+        }
+      }
+      /* desktop and laptop: three-column app layout that fits the window */
+      @media (min-width: 1100px) and (min-height: 560px) {
+        html,
+        body {
+          height: 100%;
+          overflow: hidden;
+        }
+        body {
+          padding: 8px;
+        }
+        .container {
+          display: grid;
+          grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(330px, 400px);
+          grid-template-rows: auto minmax(0, 1fr);
+          gap: 8px;
+          max-width: none;
+          height: 100%;
+        }
+        .hd {
+          grid-column: 1/-1;
+          margin: 0;
+        }
+        .content-grid {
+          display: contents;
+        }
+        .info-panel {
+          grid-column: 1;
+          grid-row: 2;
+          overflow-y: auto;
+          min-height: 0;
+        }
+        .canvas-col {
+          grid-column: 2;
+          grid-row: 2;
+          min-height: 0;
+          order: 0;
+        }
+        .controls {
+          grid-column: 3;
+          grid-row: 2;
+          overflow-y: auto;
+          min-height: 0;
+        }
+        .canvas-container {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+        }
+        #cv {
+          flex: 1 1 0;
+          height: auto !important;
+          min-height: 0 !important;
+          max-height: none !important;
+        }
+        .controls .tabs {
+          position: sticky;
+          top: -10px;
+          z-index: 2;
+          background: var(--pn);
+          padding-top: 10px;
+          margin-top: -10px;
+        }
+      }
+      @media (min-width: 1600px) {
+        .container {
+          grid-template-columns: 280px minmax(0, 1fr) 440px;
+        }
+      }
+      .mb-panel {
+        background: #fff;
+        color: #000;
+        border: 1px solid #b8bec9;
+        padding: 10px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px 14px;
+        width: min(92vw, 720px);
+        align-items: end;
+      }
+      .mb-panel .full {
+        grid-column: 1/-1;
+      }
+      .mb-panel .hint {
+        margin: 0;
+      }
+      #mc {
+        max-width: 92vw;
+        max-height: 56vh;
+        background: #000;
+      }
+      .hd {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .hd select {
+        width: auto;
+        min-width: 130px;
+      }
+      /* dark theme: same colours, light surfaces become dark */
+      body.dk {
+        --bg: #000;
+        --pn: #0b0b0b;
+        --fg: #fff;
+        --mut: #b5b5b5;
+        --ac: #6f8fff;
+        color-scheme: dark;
+      }
+      body.dk .hd h1 {
+        color: #6f8fff;
+      }
+      body.dk .info-panel,
+      body.dk .controls {
+        background: #0b0b0b;
+      }
+      body.dk .info-panel,
+      body.dk .controls,
+      body.dk .canvas-container,
+      body.dk .fg canvas {
+        border-color: #3a3a3a;
+      }
+      body.dk .info-panel h3,
+      body.dk .grp {
+        background: #10131c;
+        color: #6f8fff;
+      }
+      body.dk .info-row {
+        border-bottom-color: #222;
+      }
+      body.dk .info-row:nth-child(even) {
+        background: #121212;
+      }
+      body.dk .bar {
+        background: #0b0b0b;
+        border-top-color: #3a3a3a;
+      }
+      body.dk button {
+        background: #1a1a1a;
+        border-color: #444;
+        color: #fff;
+      }
+      body.dk button:hover {
+        background: #262626;
+        border-color: #003399;
+      }
+      body.dk button.p {
+        background: #003399;
+        border-color: #003399;
+        color: #fff;
+      }
+      body.dk button.p:hover {
+        background: #0a4ac0;
+      }
+      body.dk select,
+      body.dk input[type="text"],
+      body.dk input:not([type]) {
+        background: #000;
+        border-color: #444;
+        color: #fff;
+      }
+      body.dk .f label {
+        color: #fff;
+      }
+      body.dk .tabs {
+        border-bottom-color: #333;
+      }
+      body.dk .tab {
+        color: #ccc;
+      }
+      body.dk .tab:hover {
+        background: #1a1a1a;
+      }
+      body.dk .tab.on {
+        color: #6f8fff;
+        border-bottom-color: #003399;
+      }
+      body.dk .ob {
+        border-bottom-color: #222;
+      }
+      body.dk .mb-panel {
+        background: #0b0b0b;
+        color: #fff;
+        border-color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="hd">
+        <h1>
+          StarryFlameSPH
+          <span class="beta">BETA</span>
+        </h1>
+        <select id="thm" title="Theme">
+          <option value="w">Light theme</option>
+          <option value="k">Dark theme</option>
+        </select>
+      </header>
+      <div class="content-grid">
+        <div class="info-panel">
+          <h3>Simulation Status</h3>
+          <div class="info-table" id="pr"></div>
+          <h3>Selected Object</h3>
+          <select id="sel"></select>
+          <div class="info-table" id="bp" style="margin-top: 8px"></div>
+        </div>
+        <div class="canvas-col">
+          <div class="canvas-container">
+            <canvas id="cv"></canvas>
+            <div class="bar">
+              <button id="pl" class="p">Pause</button>
+              <button id="rs">Restart</button>
+              <button id="rv">Reset Camera</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <nav class="tabs">
+          <button class="tab on" data-t="scn">Scenarios</button>
+          <button class="tab" data-t="obj" id="tabo" style="display: none">Add Objects</button>
+          <button class="tab" data-t="phy">Physics</button>
+          <button class="tab" data-t="dsp">Appearance</button>
+          <button class="tab" data-t="snp">Snapshots</button>
+          <button class="tab" data-t="mov">GIF / Video</button>
+        </nav>
+        <section class="tp" id="t_scn">
+          <div class="grid">
+            <h4 class="grp">Choose a Scenario</h4>
+            <div class="f full">
+              <label for="pre">Scenario</label>
+              <select id="pre"></select>
+            </div>
+            <div id="std" class="grid full">
+              <h4 class="grp">Collision Setup</h4>
+              <div class="f">
+                <label for="g">
+                  Body 2 Size
+                  <b id="g_v"></b>
+                </label>
+                <input id="g" type="range" min="0.02" max="1" step="0.01" />
+              </div>
+              <div class="f">
+                <label for="b">
+                  Impact Angle
+                  <b id="b_v"></b>
+                </label>
+                <input id="b" type="range" min="0" max="1.6" step="0.05" />
+              </div>
+              <div class="f">
+                <label for="vi">
+                  Impact Speed
+                  <b id="vi_v"></b>
+                </label>
+                <input id="vi" type="range" min="0" max="4" step="0.05" />
+              </div>
+              <h4 class="grp">Rotation</h4>
+              <div class="f">
+                <label>
+                  Body 2 Rotation
+                  <b id="spi_v"></b>
+                </label>
+                <input id="spi" type="range" min="-0.6" max="0.6" step="0.05" value="0" />
+              </div>
+              <div class="f">
+                <label>
+                  Body 1 Rotation
+                  <b id="sp_v"></b>
+                </label>
+                <input id="sp" type="range" min="-0.6" max="0.6" step="0.05" />
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="tp" id="t_obj" hidden>
+          <div class="grid">
+            <div class="f">
+              <label for="tpl">Planet Type</label>
+              <select id="tpl">
+                <option value="">Custom</option>
+                <option value="large">Large planet</option>
+                <option value="mid">Medium planet</option>
+                <option value="small">Small planet</option>
+                <option value="tiny">Tiny body</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="om">
+                Mass
+                <b id="om_v"></b>
+              </label>
+              <input id="om" type="range" min="0.005" max="4" step="0.005" value="1" />
+            </div>
+            <div class="f">
+              <label for="os">
+                Starting Speed
+                <b id="os_v"></b>
+              </label>
+              <input id="os" type="range" min="0" max="40" step="1" value="0" />
+            </div>
+            <div class="f">
+              <label for="od">
+                Starting Direction
+                <b id="od_v"></b>
+              </label>
+              <input id="od" type="range" min="0" max="355" step="5" value="180" />
+            </div>
+            <div class="f">
+              <label for="oy">
+                Rotation
+                <b id="oy_v"></b>
+              </label>
+              <input id="oy" type="range" min="-0.6" max="0.6" step="0.05" value="0" />
+            </div>
+            <div class="f">
+              <label for="oh">Colour</label>
+              <select id="oh">
+                <option value="blue">Blue</option>
+                <option value="red">Red</option>
+                <option value="green">Green</option>
+                <option value="yellow">Yellow</option>
+                <option value="orange">Orange</option>
+                <option value="purple">Purple</option>
+                <option value="pink">Pink</option>
+                <option value="cyan">Cyan</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="omode">Starting Motion</label>
+              <select id="omode">
+                <option value="">Use the speed and direction above</option>
+                <option value="p">Orbit the heaviest object</option>
+                <option value="r">Orbit the heaviest object</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="oe">
+                Orbit Shape
+                <b id="oe_v"></b>
+              </label>
+              <input id="oe" type="range" min="0" max="0.9" step="0.05" value="0" />
+            </div>
+            <div class="f">
+              <label for="dm">When Dragging an Object</label>
+              <select id="dm">
+                <option value="v">Sets its speed and direction</option>
+                <option value="m">Moves it</option>
+              </select>
+            </div>
+            <div class="opts">
+              <label class="ck">
+                <input type="checkbox" id="pm" checked />
+                <span>Tap the canvas to add a body</span>
+              </label>
+            </div>
+            <div class="actions">
+              <button id="bl" class="p">Start Simulation</button>
+              <button id="be">Edit Objects</button>
+              <button id="bc">Remove All Objects</button>
+            </div>
+            <div id="ol" class="full"></div>
+          </div>
+        </section>
+        <section class="tp" id="t_phy" hidden>
+          <div class="grid">
+            <h4 class="grp">Quality and Starting Conditions</h4>
+            <div class="f">
+              <label for="n">
+                Quality
+                <b id="n_v"></b>
+              </label>
+              <input id="n" type="range" min="600" max="10000" step="200" value="2000" />
+            </div>
+            <div class="f">
+              <label for="tk">
+                Starting Temperature
+                <b id="tk_v"></b>
+              </label>
+              <input id="tk" type="range" min="20" max="6000" step="100" />
+            </div>
+            <h4 class="grp">Gravity and Sticking Together</h4>
+            <div class="f">
+              <label for="gs">
+                Gravity Strength
+                <b id="gs_v"></b>
+              </label>
+              <input id="gs" type="range" min="0.5" max="3" step="0.1" value="1" />
+            </div>
+            <div class="f">
+              <label for="ch">
+                Cohesion
+                <b id="ch_v"></b>
+              </label>
+              <input id="ch" type="range" min="0" max="4" step="0.1" value="1" />
+            </div>
+            <div class="f">
+              <label for="dc">
+                Debris Clumping
+                <b id="dc_v"></b>
+              </label>
+              <input id="dc" type="range" min="0" max="4" step="0.1" value="1.5" />
+            </div>
+          </div>
+        </section>
+        <section class="tp" id="t_dsp" hidden>
+          <div class="grid">
+            <div class="f">
+              <label for="vw">Colour By</label>
+              <select id="vw">
+                <option value="0">Object Colours</option>
+                <option value="1">Temperature</option>
+                <option value="2">Density</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="ps">
+                Particle Size
+                <b id="ps_v"></b>
+              </label>
+              <input id="ps" type="range" min="0.5" max="2" step="0.1" value="1.6" />
+            </div>
+            <div class="f">
+              <label for="bt">
+                Blob Smoothness
+                <b id="bt_v"></b>
+              </label>
+              <input id="bt" type="range" min="0.8" max="4" step="0.1" value="1.6" />
+            </div>
+            <div class="f">
+              <label for="bq">
+                Blob Resolution
+                <b id="bq_v"></b>
+              </label>
+              <input id="bq" type="range" min="1" max="3" step="0.5" value="1.5" />
+            </div>
+            <div class="opts">
+              <label class="ck">
+                <input type="checkbox" id="bm" checked />
+                <span>Blob Mode</span>
+              </label>
+              <label class="ck">
+                <input type="checkbox" id="af" />
+                <span>Auto-Zoom to Fit Everything</span>
+              </label>
+              <label class="ck">
+                <input type="checkbox" id="cbm" checked />
+                <span>Show colour bar</span>
+              </label>
+            </div>
+          </div>
+        </section>
+        <section class="tp" id="t_snp" hidden>
+          <div class="grid">
+            <div class="f">
+              <label for="iv">Take a Snapshot</label>
+              <select id="iv">
+                <option value="0.5">every 0.5 hours</option>
+                <option value="1">every hour</option>
+                <option value="2">every 2 hours</option>
+                <option value="3">every 3 hours</option>
+                <option value="">at custom times</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="stt">Custom times</label>
+              <input id="stt" value="0.5,2.5,5,10,15,25,35,60" />
+            </div>
+            <div class="f">
+              <label for="sf">Snapshot Camera</label>
+              <select id="sf">
+                <option value="fix">Same view every time</option>
+                <option value="fit">Follow the object</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="sw">
+                Fixed view width
+                <b id="sw_v"></b>
+              </label>
+              <input id="sw" type="range" min="10" max="300" step="5" value="80" />
+            </div>
+            <div class="opts">
+              <label class="ck">
+                <input type="checkbox" id="cbs" checked />
+                <span>Show colour bar on snapshots</span>
+              </label>
+            </div>
+          </div>
+          <div class="actions" style="margin-top: 14px">
+            <button id="sn">Take Snapshot Now</button>
+            <button id="cl">Delete All Snapshots</button>
+          </div>
+          <div id="fig" class="fg"></div>
+        </section>
+        <section class="tp" id="t_mov" hidden>
+          <p class="hint">
+            Restarts the scenario and records it from the start. When it finishes you can preview
+            it, change the playback speed, and then download it as a GIF or a video.
+          </p>
+          <div class="grid">
+            <div class="f">
+              <label for="md">
+                Length to record
+                <b id="md_v"></b>
+              </label>
+              <input id="md" type="range" min="1" max="100" step="1" value="12" />
+            </div>
+            <div class="f">
+              <label for="mi">Take a Frame</label>
+              <select id="mi">
+                <option value="0.05">every 0.05 hours</option>
+                <option value="0.1" selected>every 0.1 hours</option>
+                <option value="0.2">every 0.2 hours</option>
+                <option value="0.25">every 0.25 hours</option>
+                <option value="0.5">every 0.5 hours</option>
+                <option value="1">every hour</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="mz">
+                Frame size
+                <b id="mz_v"></b>
+              </label>
+              <input id="mz" type="range" min="240" max="720" step="40" value="480" />
+            </div>
+            <div class="f">
+              <label for="mcam">Camera</label>
+              <select id="mcam">
+                <option value="fix">Same view every frame</option>
+                <option value="fit">Follow the object</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="mw">
+                Fixed view width
+                <b id="mw_v"></b>
+              </label>
+              <input id="mw" type="range" min="10" max="300" step="5" value="80" />
+            </div>
+            <div class="opts">
+              <label class="ck">
+                <input type="checkbox" id="mcb" checked />
+                <span>Show colour bar in movies</span>
+              </label>
+            </div>
+          </div>
+          <div id="mhint" class="hint" style="margin-top: 8px"></div>
+          <div class="actions">
+            <button id="mrec" class="p">Record GIF / Video</button>
+            <button id="mstop">Stop</button>
+            <button id="mcl">Delete All Movies</button>
+          </div>
+          <div id="mst" class="hint" style="margin-top: 8px"></div>
+          <div id="movs" class="fg"></div>
+        </section>
+      </div>
+    </div>
+    <div id="lb" class="lb" hidden>
+      <img id="lbi" alt="" />
+      <span>Press and hold or right-click to save</span>
+    </div>
+    <div id="mb" class="lb" hidden>
+      <canvas id="mc"></canvas>
+      <div class="mb-panel">
+        <div class="f">
+          <label for="pfps">
+            Playback speed
+            <b id="pfps_v"></b>
+          </label>
+          <input id="pfps" type="range" min="1" max="50" step="1" value="20" />
+        </div>
+        <div class="f">
+          <label for="pfr">
+            Frame
+            <b id="pfr_v"></b>
+          </label>
+          <input id="pfr" type="range" min="0" max="0" step="1" value="0" />
+        </div>
+        <div class="row full">
+          <button id="ppl" class="p">Pause</button>
+          <button id="pgif">Download GIF</button>
+          <button id="pvid">Download Video</button>
+          <button id="pdel">Delete</button>
+          <button id="pcl">Close</button>
+        </div>
+        <div id="pst" class="hint full"></div>
+      </div>
+    </div>
+    <script>
+      /* Tuned defaults for settings that are no longer exposed in the UI. */
+      const FIXED = Object.fromEntries(
+        Object.entries({
+          tr: false,
+          tl: 36,
+          tt: 24,
+          rf: "p",
+          sg: 1,
+          al: 1,
+          xs: 0.4,
+          tn: 0.3,
+          cd: 0.6,
+          gh: true,
+          tg: true,
+          ic: true,
+          hf: true,
+          co: true,
+          rh: false,
+          bx: 0.6,
+          br: 0.5,
+          pal: 0,
+        }).map(([k, v]) => [
+          k,
+          typeof v === "boolean"
+            ? { checked: v, addEventListener() {} }
+            : { value: v, addEventListener() {} },
+        ]),
+      );
+      const q = (id) => FIXED[id] || document.getElementById(id),
+        PI = Math.PI,
+        GG = 0.5;
+      const MT = [
+        {
+          r0: 0.118,
+          A: 0.0187,
+          B: 0.0187,
+          E0: 7.8,
+          Ei: 0.0755,
+          Ec: 0.291,
+          a: 0.5,
+          b: 1.5,
+          al: 5,
+          be: 5,
+          cv: 800,
+          col: [165, 135, 105],
+        },
+        {
+          r0: 0.343,
+          A: 0.0895,
+          B: 0.0734,
+          E0: 0.152,
+          Ei: 0.0384,
+          Ec: 0.139,
+          a: 0.5,
+          b: 1.5,
+          al: 5,
+          be: 5,
+          cv: 450,
+          col: [240, 140, 40],
+        },
+        {
+          r0: 0.0397,
+          A: 0.00662,
+          B: 0.00662,
+          E0: 0.16,
+          Ei: 0.0124,
+          Ec: 0.0486,
+          a: 0.3,
+          b: 0.1,
+          al: 10,
+          be: 5,
+          cv: 2100,
+          col: [150, 205, 240],
+        },
+      ];
+      const HUE = {
+        red: ["#ff9a00", "#ff2a2e"],
+        blue: ["#ff9a00", "#0070ff"],
+        green: ["#ff9a00", "#00e05a"],
+        yellow: ["#ff8a2a", "#ffc800"] /* warm smiley-face yellow: no green in it */,
+        orange: ["#ffd400", "#ff7a00"],
+        purple: ["#ffd400", "#9b3dff"],
+        pink: ["#ffd400", "#ff3fb4"],
+        cyan: ["#ff9a00", "#00d9e0"],
+      };
+      const pair = (a, b) => [...HUE[a], ...HUE[b]];
+      /* Collision presets. M = total mass in Earth masses, g = body 2 / body 1 mass ratio, b = impact parameter
+   (0 head-on, 1 grazing), vi = speed at infinity in escape speeds (0 = contact at escape speed),
+   sp = body 1 spin as a fraction of breakup spin, tk = starting temperature (K), c = object colours. */
+      const PRE = [
+        { n: "Blank sandbox", sb: 1 },
+        { n: "Side-grazing impact", M: 1, g: 0.14, b: 0.7, vi: 0, sp: 0, tk: 1500, c: pair("blue", "yellow") },
+        { n: "Fast-spinner impact", M: 1, g: 0.05, b: 0.6, vi: 0.6, sp: 0.6, tk: 1500, c: pair("blue", "red") },
+        { n: "Head-on merger", M: 1, g: 1, b: 0, vi: 0.3, sp: 0, tk: 1500, c: pair("blue", "green") },
+        { n: "Grazing merger", M: 1, g: 0.5, b: 0.6, vi: 0.2, sp: 0, tk: 1500, c: pair("blue", "yellow") },
+        { n: "Hit and run", M: 1, g: 0.3, b: 0.85, vi: 0.7, sp: 0, tk: 1500, c: pair("purple", "orange") },
+        { n: "Disruption", M: 1, g: 0.4, b: 0.15, vi: 2.5, sp: 0, tk: 1500, c: pair("red", "cyan") },
+        { n: "Mantle stripping", M: 1, g: 0.2, b: 0.5, vi: 3.1, sp: 0, tk: 1500, c: pair("yellow", "purple") },
+        { n: "Small impact", M: 1, g: 0.03, b: 0.4, vi: 1.5, sp: 0, tk: 1500, c: pair("blue", "red") },
+        { n: "Tidal flyby", M: 1, g: 0.15, b: 1.1, vi: 0, sp: 0, tk: 1500, c: pair("cyan", "pink") },
+      ];
+
+      const HN = ["blue", "red", "green", "yellow", "orange", "purple", "pink", "cyan"];
+      const mkO = (x, y, m, cf, v, d, h) => ({
+        x,
+        y,
+        m,
+        cf,
+        mant: "basalt",
+        s: Math.round(v * 791) / 100,
+        d,
+        sp: 0,
+        cc: HUE[h][0],
+        mc: HUE[h][1],
+      });
+      PRE.push({
+        n: "Big and small body",
+        sb: 1,
+        objs: [
+          mkO(0, 0, 1, 0.3, 0, 0, "blue"),
+          mkO(4.5, 0, 0.1, 0.25, Math.sqrt((1.1 * GG) / 4.5), 90, "yellow"),
+        ],
+      });
+      PRE.push({
+        n: "Binary bodies",
+        sb: 1,
+        objs: [
+          mkO(-1.667, 0, 1, 0.3, (Math.sqrt(0.3 * GG) * 0.5) / 1.5, 270, "blue"),
+          mkO(3.333, 0, 0.5, 0.3, Math.sqrt(0.3 * GG) / 1.5, 90, "green"),
+        ],
+      });
+      const h2r = (h) => [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16));
+      const pre = q("pre");
+      PRE.forEach((p, i) => pre.add(new Option(p.n, i)));
+      const IDS = [
+        "gs",
+        "ch",
+        "dc",
+        "bt",
+        "om",
+        "os",
+        "od",
+        "oy",
+        "oe",
+        "n",
+        "g",
+        "b",
+        "vi",
+        "spi",
+        "sp",
+        "tk",
+        "sw",
+        "ps",
+        "bq",
+        "md",
+        "mz",
+        "mw",
+      ];
+      function lbl() {
+        GM = +q("gs").value;
+        SGF = +q("sg").value;
+        CHV = +q("ch").value;
+        DCL = +q("dc").value;
+        TK = +q("tk").value;
+        VA = +q("al").value;
+        TN = +q("tn").value;
+        XE = +q("xs").value;
+        CL = +q("cd").value;
+        IDS.forEach((k) => (q(k + "_v").textContent = q(k).value + (UNITS[k] || "")));
+        movHint();
+      }
+      /* units shown after slider values */
+      const UNITS = {
+        om: " M\u2295",
+        os: " km/s",
+        od: "\u00b0",
+        n: " particles",
+        tk: " K",
+        sw: " thousand km",
+        mw: " thousand km",
+        md: " h",
+        mz: " px",
+      };
+      function tab(n) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((x) => x.classList.toggle("on", x.dataset.t === n));
+        document.querySelectorAll(".tp").forEach((p) => (p.hidden = p.id !== "t_" + n));
+      }
+      /* the fixed snapshot view width follows the size of the system that was just built (thousand km) */
+      function fitSnapView() {
+        const w = 7 * (RT + RI) * 6.4;
+        ["sw", "mw"].forEach((id) => {
+          const e = q(id);
+          e.min = w / 8;
+          e.max = w * 4;
+          e.step = w / 100;
+          e.value = w;
+        });
+        lbl();
+      }
+      function applyPre() {
+        const p = PRE[pre.value];
+        SB = !!p.sb;
+        q("std").style.display = SB ? "none" : "";
+        const blank = !(p.objs && p.objs.length);
+        q("tabo").style.display = SB && blank ? "" : "none";
+        if (!(SB && blank) && !q("t_obj").hidden) tab("scn");
+        if (!SB) {
+          ["g", "b", "vi", "sp"].forEach((k) => (q(k).value = p[k]));
+          q("spi").value = p.spi ?? 0;
+        }
+        q("tk").value = p.tk || 1500;
+        q("ch").value = 1;
+        q("dc").value = 1.5;
+        q("gs").value = 1;
+        q("sg").value = 1;
+        q("al").value = 1;
+        q("n").value = 2000;
+        q("tn").value = 0.3;
+        q("xs").value = 0.4;
+        q("cd").value = 0.6;
+        if (SB) {
+          objs = p.objs ? p.objs.map((o) => ({ ...o })) : [];
+          edit = blank;
+          renderObjs();
+          if (blank) tab("obj");
+        }
+        lbl();
+        init();
+        AF.checked = false;
+        viewFit();
+        fitSnapView();
+      }
+      /* one-off camera placement for a freshly loaded scenario (auto-zoom stays off) */
+      function viewFit() {
+        if (SB && edit) {
+          zoom = 1;
+          px = py = 0;
+          return;
+        }
+        const [x0, y0, hf] = bbox(),
+          m = Math.min(W, Hh);
+        zoom = Math.max(0.2, Math.min(1e9, ((m / (2 * hf * 1.12)) * 13) / m));
+        px = ((vcx - x0) * zoom * m) / 13;
+        py = ((vcy - y0) * zoom * m) / 13;
+      }
+      q("bq").value =
+        (devicePixelRatio || 1) >= 2
+          ? 1
+          : 1.5; /* hi-DPI screens are already sharp at native resolution; supersample standard screens */
+      pre.onchange = applyPre;
+      pre.value = 1;
+      IDS.forEach((k) => (q(k).oninput = lbl));
+      ["n", "g", "b", "vi", "sp", "spi", "tk"].forEach((k) => (q(k).onchange = init));
+      q("stt").onchange = setSnaps;
+      q("iv").onchange = setSnaps;
+      q("rs").onclick = init;
+      q("pl").onclick = () => {
+        run = !run;
+        q("pl").textContent = run ? "Pause" : "Play";
+      };
+      const RLX = 360;
+      let GM = 1,
+        SGF = 1,
+        IC = true,
+        GHON = true,
+        TG = true,
+        GH,
+        LNK = 0.1,
+        IMPD = false,
+        COLL = false;
+      const RW = [0, 1, 2].flatMap((a) =>
+        [0, 1, 2].map((b) => MT[a].r0 / MT[b].r0),
+      ); /* kernel-enclosed mass fraction of the 2D cubic spline: exact 1/r gravity outside 2h, smooth inside */
+      function GF(q) {
+        if (q >= 2) return 1;
+        if (q < 1) return 2.857142857 * (q * q * 0.5 - 0.375 * q ** 4 + 0.15 * q ** 5);
+        const u = 2 - q;
+        return 2.857142857 * (0.275 + 0.25 * (0.3 - (u ** 4 * 0.5 - u ** 5 * 0.2)));
+      }
+      let CHV = 1;
+      let DCL = 1.5;
+      const CHK = 0.03,
+        CS0 = MT.map((m) => m.A / m.r0);
+      let AEF = 1e9,
+        LBS = null,
+        CL = 0.6,
+        TN = 0.3,
+        XE = 0.4,
+        TJ = null,
+        drag = null,
+        XVX,
+        XVY,
+        OX,
+        OY,
+        DCM = [0.03, 0.03, 0.03],
+        NR,
+        objs = [],
+        SB = false,
+        edit = true,
+        MTOT = 1,
+        CP = [],
+        BAL,
+        MS,
+        N,
+        X,
+        Y,
+        VX,
+        VY,
+        AX,
+        AY,
+        AX0,
+        AY0,
+        RHO,
+        H,
+        U,
+        DU,
+        P,
+        C,
+        MA,
+        BD,
+        SH,
+        RR,
+        BX,
+        BY,
+        NL,
+        NC,
+        nxt,
+        cellOf,
+        head = new Int32Array(70000);
+      let ALP,
+        DIV,
+        HMN = 0.02,
+        E0,
+        COL = true,
+        RD = 0.04,
+        VA = 1,
+        TK = 1500,
+        vcx = 0,
+        vcy = 0,
+        snapT = [],
+        snapI = 0,
+        relax = 0,
+        T = 0,
+        steps = 0,
+        dt = 0.05,
+        run = true,
+        PM = 0,
+        RT = 1,
+        RI = 0.5,
+        stat = {},
+        frameN = 0;
+      const AS = 0.2,
+        AU = 1,
+        ETA = 1.5,
+        CAP = 110;
+      /* Temperature model. Specific energy u (J/kg) <-> T (K) per material, instead of one constant heat capacity:
+         solid heating (cs, about the Dulong-Petit value for silicates), melting over m1..m2 (forsterite 2163 K at 1 bar, latent heat Lf),
+         liquid heating (cl, about 1.4 x cs as in ANEOS); the melt range is raised for compressed rock (see melt scale in tempK); only for expanded states (rho < 0.5 rho0)
+         also boiling over b1..b2 (latent heat Lv) and vapour heating (cg). Compressed rock stays liquid at planetary pressures. */
+      const TPAR = [
+        {
+          cs: 1250,
+          m1: 1950,
+          m2: 2250,
+          Lf: 6e5,
+          cl: 1750,
+          b1: 3400,
+          b2: 4400,
+          Lv: 1.2e7,
+          cg: 1500,
+        },
+        { cs: 560, m1: 1800, m2: 1850, Lf: 2.7e5, cl: 800, b1: 3100, b2: 4000, Lv: 6.1e6, cg: 700 },
+        { cs: 2000, m1: 270, m2: 275, Lf: 3.3e5, cl: 4200, b1: 550, b2: 700, Lv: 2.3e6, cg: 2000 },
+      ];
+      /* f scales the melting range: rock melts hotter under compression (Lindemann-type rise with density) */
+      function eCond(T, p, f = 1) {
+        const m1 = p.m1 * f,
+          m2 = p.m2 * f;
+        if (T <= m1) return p.cs * T;
+        const e1 = p.cs * m1;
+        if (T <= m2) return e1 + (p.cs + p.Lf / (m2 - m1)) * (T - m1);
+        return e1 + p.cs * (m2 - m1) + p.Lf + p.cl * (T - m2);
+      }
+      function tCond(E, p, f = 1) {
+        const m1 = p.m1 * f,
+          m2 = p.m2 * f,
+          e1 = p.cs * m1;
+        if (E <= e1) return E / p.cs;
+        const ce = p.cs + p.Lf / (m2 - m1),
+          e2 = e1 + ce * (m2 - m1);
+        return E <= e2 ? m1 + (E - e1) / ce : m2 + (E - e2) / p.cl;
+      }
+      /* temperature of particle i in kelvin */
+      function tempK(i) {
+        const p = TPAR[MA[i]],
+          E = Math.max(0, U[i] * 6.25e7),
+          rr = RHO[i] / MT[MA[i]].r0,
+          Tc = tCond(E, p, Math.min(2, Math.max(1, rr) ** 1.2));
+        if (rr >= 0.5) return Tc;
+        const Eb = eCond(p.b1, p),
+          Tv =
+            E <= Eb
+              ? Tc
+              : E <= Eb + p.Lv
+                ? p.b1 + ((p.b2 - p.b1) * (E - Eb)) / p.Lv
+                : p.b2 + (E - Eb - p.Lv) / p.cg;
+        return Tc + (Tv - Tc) * Math.min(1, (0.5 - rr) / 0.2);
+      }
+      const u0f = (i) =>
+        Math.max(
+          0.002,
+          eCond((MA[i] == 2 ? Math.min(TK, 200) : TK) * (1 + 1.5 * (1 - RR[i]) ** 2), TPAR[MA[i]], 1) /
+            6.25e7,
+        ); /* hot interior: up to 2.5x the surface temperature at the centre */
+      let SXX,
+        SXY,
+        SYY,
+        DMG,
+        GXX,
+        GXY,
+        GYX,
+        GYY,
+        RH = false;
+      /* solid rheology, code units (1 = 1.43e12 Pa): shear modulus, cohesion Y0, von Mises cap YM, internal friction (intact / damaged), tensile damage threshold */
+      const ST = [
+        { mu: 0.0159, Y0: 7e-5, YM: 0.00245, mi: 2, md: 0.8, sT: 1.4e-4 },
+        { mu: 0.0538, Y0: 1.4e-4, YM: 0.0014, mi: 1.5, md: 0.6, sT: 4e-4 },
+        { mu: 0.00245, Y0: 3.5e-5, YM: 7e-5, mi: 1.5, md: 0.5, sT: 3.5e-5 },
+      ];
+      function alloc(n) {
+        N = n;
+        const F = () => new Float64Array(N);
+        [X, Y, VX, VY, AX, AY, AX0, AY0, RHO, H, U, DU, P, C, BX, BY, XVX, XVY] = Array.from(
+          { length: 18 },
+          F,
+        );
+        GH = new Float64Array(N).fill(1);
+        BAL = new Float64Array(N);
+        ALP = new Float64Array(N).fill(0.25 * VA);
+        DIV = new Float64Array(N);
+        MS = new Float64Array(N);
+        NR = new Float64Array(N);
+        OX = new Float64Array(N);
+        OY = new Float64Array(N);
+        MA = new Uint8Array(N);
+        BD = new Uint8Array(N);
+        SH = new Uint8Array(N);
+        RR = new Float32Array(N).fill(1);
+        NL = new Int32Array(N * CAP);
+        NC = new Int32Array(N);
+        nxt = new Int32Array(N);
+        cellOf = new Int32Array(N);
+        [SXX, SXY, SYY, DMG, GXX, GXY, GYX, GYY] = Array.from({ length: 8 }, F);
+      }
+      function tail() {
+        {
+          let m = 1e9;
+          for (let i = 0; i < N; i++) if (H[i] < m) m = H[i];
+          HMN = 0.55 * m;
+        }
+        relax = RLX;
+        T = 0;
+        steps = 0;
+        stat = {};
+        E0 = L0 = undefined;
+        dtp = 0;
+        TJ = null;
+        vcx = vcy = 0;
+        const AR = AEF < 1e9 ? AEF : PM / 0.118;
+        LNK = 1.5 * Math.sqrt(AR);
+        IMPD = false;
+        COLL = false;
+        AEF = 1e9;
+        RD = 0.45 * Math.sqrt(AR);
+        DCM = MT.map(() => 0.57 * Math.sqrt(AR));
+        LBS = null;
+        setSnaps();
+        q("fig").innerHTML = "";
+        tgt = 0;
+        eff = 1;
+        ENOW = undefined;
+        /* drop every cached per-particle colour and blob grouping: particle order differs between presets */
+        DN = -1;
+        BLG = [];
+        BLF = [];
+        BLR = null;
+      }
+      function mk(body, off, n, M, cf, mant, core = 1) {
+        const Vc = (M * cf) / MT[core].r0,
+          Vm = (M * (1 - cf)) / MT[mant].r0,
+          nc = Math.round((n * Vc) / (Vc + Vm)),
+          A = (Vc + Vm) / n,
+          rc = Math.sqrt(Vc / PI),
+          R = Math.sqrt((Vc + Vm) / PI);
+        AEF = Math.min(AEF, A);
+        const sites = (cnt, dens, inner) => {
+          if (cnt <= 0) return [];
+          const a = Math.sqrt((2 * A) / 1.7320508),
+            Ro = Math.sqrt(inner * inner + (cnt * A) / PI),
+            Ri = inner > 0 ? inner : 0,
+            L = [];
+          const rnd = () => {
+            const r = Math.sqrt(Ri * Ri + Math.random() * (Ro * Ro - Ri * Ri)),
+              t = Math.random() * 2 * PI;
+            return [r * Math.cos(t), r * Math.sin(t)];
+          };
+          for (let i = 0; i < cnt; i++) {
+            let b = null,
+              bd = -1;
+            for (let k = 0; k < 8; k++) {
+              const p = rnd();
+              let m = 1e9;
+              for (let j = 0; j < i; j++) {
+                const d = (p[0] - L[j][0]) ** 2 + (p[1] - L[j][1]) ** 2;
+                if (d < m) m = d;
+              }
+              if (m > bd) {
+                bd = m;
+                b = p;
+              }
+            }
+            L.push([b[0], b[1], 0]);
+          }
+          const cs = a,
+            G = Math.ceil((2 * Ro) / cs) + 4,
+            off = Ro + cs,
+            lo = Ri > 0 ? Ri + 0.4 * a : 0,
+            hi = Ro - 0.3 * a;
+          for (let it = 0; it < 40; it++) {
+            const Hm = new Map();
+            L.forEach((p, i) => {
+              const k = (((p[0] + off) / cs) | 0) * G + (((p[1] + off) / cs) | 0);
+              (Hm.get(k) || Hm.set(k, []).get(k)).push(i);
+            });
+            const dx = new Float64Array(cnt),
+              dy = new Float64Array(cnt);
+            L.forEach((p, i) => {
+              const cx = ((p[0] + off) / cs) | 0,
+                cy = ((p[1] + off) / cs) | 0;
+              for (let u = -1; u < 2; u++)
+                for (let v = -1; v < 2; v++) {
+                  const c = Hm.get((cx + u) * G + cy + v);
+                  if (c)
+                    for (const j of c) {
+                      if (j == i) continue;
+                      const x = p[0] - L[j][0],
+                        y = p[1] - L[j][1],
+                        d = Math.hypot(x, y);
+                      if (d < a && d > 1e-9) {
+                        const f = (0.25 * (a - d)) / d;
+                        dx[i] += x * f;
+                        dy[i] += y * f;
+                      }
+                    }
+                }
+            });
+            L.forEach((p, i) => {
+              p[0] += dx[i];
+              p[1] += dy[i];
+              const r = Math.hypot(p[0], p[1]),
+                rr = Math.min(hi, Math.max(lo, r));
+              if (r > 1e-9 && rr !== r) {
+                p[0] *= rr / r;
+                p[1] *= rr / r;
+              }
+            });
+          }
+          L.forEach((p) => (p[2] = Math.hypot(p[0], p[1])));
+          return L;
+        };
+        const sq = Math.min(0.97, Math.max(0.5, 0.9 - 0.253 * Math.log10(M / 0.11))),
+          P = sites(nc, MT[core].r0, 0).concat(sites(n - nc, MT[mant].r0, nc ? rc : 0));
+        for (let k = 0; k < n; k++) {
+          const i = off + k,
+            iscore = k < nc;
+          X[i] = P[k][0] * sq;
+          Y[i] = P[k][1] * sq;
+          MA[i] = iscore ? core : mant;
+          BD[i] = body;
+          {
+            const rr = P[k][2] / R;
+            SH[i] =
+              rr < 0.26 ? 0 : rr < 0.46 ? 1 : rr < 0.66 ? 2 : rr < 0.86 ? 3 : rr < 0.92 ? 4 : 5;
+            RR[i] = Math.min(1, rr);
+          }
+          H[i] = sq * ETA * Math.sqrt(A);
+          MS[i] = (iscore ? MT[core].r0 : MT[mant].r0) * A;
+          U[i] = u0f(i);
+        }
+        return R * sq;
+      }
+      /* single material for every object; radius matches the squeeze factor used in mk() */
+      const sqf = (M) => Math.min(0.97, Math.max(0.5, 0.9 - 0.253 * Math.log10(M / 0.11)));
+      const objR = (o) => sqf(o.m) * Math.sqrt(o.m / MT[0].r0 / PI);
+      function initSB() {
+        const tot = objs.reduce((a, o) => a + o.m, 0);
+        if (!objs.length) {
+          edit = true;
+          return init();
+        }
+        MTOT = tot;
+        const cnt = objs.map((o) => Math.max(80, Math.round((+q("n").value * o.m) / tot))),
+          n = cnt.reduce((a, b) => a + b, 0);
+        PM = tot / n;
+        alloc(n);
+        CP = [];
+        let off = 0,
+          mx = 0,
+          vx0 = 0,
+          vy0 = 0;
+        const Rs = [];
+        objs.forEach((o, k) => {
+          const R = mk(k, off, cnt[k], o.m, 0, 0);
+          Rs.push(R);
+          CP.push(h2r(o.cc), h2r(o.mc));
+          const om = o.sp * Math.sqrt((GG * GM * o.m) / R ** 3),
+            v = o.s / 7.91,
+            a = (o.d * PI) / 180,
+            vx = v * Math.cos(a),
+            vy = v * Math.sin(a);
+          vx0 += (vx * o.m) / tot;
+          vy0 += (vy * o.m) / tot;
+          for (let i = off; i < off + cnt[k]; i++) {
+            BX[i] = vx - om * Y[i];
+            BY[i] = vy + om * X[i];
+            X[i] += o.x;
+            Y[i] += o.y;
+          }
+          off += cnt[k];
+        });
+        for (let i = 0; i < N; i++) {
+          BX[i] -= vx0;
+          BY[i] -= vy0;
+        }
+        const ord = objs.map((o, k) => k).sort((a, b) => objs[b].m - objs[a].m);
+        RT = Rs[ord[0]];
+        RI = Rs[ord[1] ?? ord[0]];
+        tail();
+      }
+      function init() {
+        if (SB) {
+          if (edit) {
+            alloc(0);
+            TJ = null;
+            stat = {};
+            T = 0;
+            relax = 0;
+            snapT = [];
+            q("fig").innerHTML = "";
+            return;
+          }
+          return initSB();
+        }
+        const p = PRE[pre.value];
+        MTOT = p.M || 1;
+        CP = (p.c || []).map(h2r);
+        const g = +q("g").value,
+          b = +q("b").value,
+          u0 = +q("vi").value,
+          cf = 0,
+          cfi = 0,
+          sp = +q("sp").value,
+          spi = +q("spi").value,
+          mant = 0,
+          mti = 0;
+        TK = +q("tk").value;
+        VA = +q("al").value;
+        N = +q("n").value;
+        PM = MTOT / N;
+        const nI = Math.max(80, Math.round((N * g) / (1 + g))),
+          nT = N - nI,
+          Mt = nT * PM,
+          Mi = nI * PM;
+        alloc(N);
+
+        RT = mk(0, 0, nT, Mt, 0, 0, 0);
+        RI = mk(1, nT, nI, Mi, 0, 0, 0);
+        const ft = Mt / MTOT,
+          fi = Mi / MTOT;
+        const s = RT + RI,
+          GE = GG * GM * MTOT,
+          ve = Math.sqrt((2 * GE) / s),
+          vinf = u0 * ve,
+          vc = Math.sqrt(vinf * vinf + (2 * GE) / s),
+          d = s * (p.d0 || Math.min(6, Math.exp((0.44 * vc * vc) / GE))),
+          h = b * s * vc;
+        /* gravity here is 1/r^2: start on the exact two-body trajectory (energy vinf^2/2 - GM/r, angular momentum h = b*s*vc) so contact speed and angle match the sliders */
+        let vd = vc,
+          b0 = 0;
+        for (let k = 0; k < 30; k++) {
+          const r0 = Math.hypot(d, b0);
+          vd = Math.sqrt(vinf * vinf + (2 * GE) / r0);
+          b0 = h / vd;
+        }
+        const om = sp * Math.sqrt((GG * GM * Mt) / RT ** 3),
+          omI = spi * Math.sqrt((GG * GM * Mi) / RI ** 3);
+        for (let i = 0; i < N; i++) {
+          const t = BD[i] == 0;
+          if (t) {
+            BX[i] = fi * vd - om * Y[i];
+            BY[i] = om * X[i];
+            X[i] -= fi * d;
+            Y[i] -= fi * b0;
+          } else {
+            BX[i] = -ft * vd - omI * Y[i];
+            BY[i] = omI * X[i];
+            X[i] += ft * d;
+            Y[i] += ft * b0;
+          }
+        }
+        tail();
+      }
+      function eos(i) {
+        const m = MT[MA[i]],
+          rho = RHO[i],
+          u = U[i],
+          e = rho / m.r0,
+          mu = e - 1,
+          w = u / (m.E0 * e * e) + 1;
+        const Pc = (m.a + m.b / w) * rho * u + m.A * mu + m.B * mu * mu;
+        let p;
+        if (e >= 1 || u <= m.Ei) p = Pc;
+        else {
+          const x = 1 / e - 1,
+            Pe =
+              m.a * rho * u +
+              ((m.b * rho * u) / w + m.A * mu * Math.exp(-m.be * x)) * Math.exp(-m.al * x * x);
+          p = u >= m.Ec ? Pe : (Pc * (m.Ec - u) + Pe * (u - m.Ei)) / (m.Ec - m.Ei);
+        }
+        P[i] = p > 0 ? p : e > 0.8 && u < m.Ei ? Math.max(p, -TN * m.A) : 0;
+        C[i] = Math.sqrt(
+          Math.max(
+            0.01,
+            (m.A + 2 * m.B * Math.max(mu, 0)) / Math.max(rho, 0.7 * m.r0) + (m.a + m.b) * u,
+          ),
+        );
+      }
+
+      /* Barnes-Hut quadtree gravity (monopole, theta = .45, Newtonian 1/r^2 force in the 2D plane). Nodes are only accepted outside 2*max(h) so the kernel softening is always resolved exactly. */
+      let FRE = new Uint8Array(0);
+      let TCX = new Float64Array(0),
+        TCY = TCX,
+        THS = TCX,
+        TM = TCX,
+        TMX = TCX,
+        TMY = TCX,
+        TCH = new Int32Array(0),
+        TBD = TCH,
+        TST = new Int32Array(512),
+        NNODE = 0;
+      function treeGravity(gg, sg) {
+        const n = N,
+          cap = 6 * n + 64;
+        if (TM.length < cap) {
+          TCX = new Float64Array(cap);
+          TCY = new Float64Array(cap);
+          THS = new Float64Array(cap);
+          TM = new Float64Array(cap);
+          TMX = new Float64Array(cap);
+          TMY = new Float64Array(cap);
+          TCH = new Int32Array(cap * 4);
+          TBD = new Int32Array(cap);
+        }
+        let a = 1e9,
+          b = 1e9,
+          A = -1e9,
+          B = -1e9,
+          hm = 0;
+        for (let i = 0; i < n; i++) {
+          const x = X[i],
+            y = Y[i];
+          if (x < a) a = x;
+          if (x > A) A = x;
+          if (y < b) b = y;
+          if (y > B) B = y;
+          if (H[i] > hm) hm = H[i];
+        }
+        TCX[0] = (a + A) / 2;
+        TCY[0] = (b + B) / 2;
+        THS[0] = Math.max(A - a, B - b) / 2 + 1e-6;
+        TM[0] = TMX[0] = TMY[0] = 0;
+        TBD[0] = -1;
+        TCH[0] = TCH[1] = TCH[2] = TCH[3] = -1;
+        NNODE = 1;
+        for (let p = 0; p < n; p++) {
+          let nd = 0,
+            d = 0;
+          const px = X[p],
+            py = Y[p],
+            mp = MS[p];
+          for (;;) {
+            TM[nd] += mp;
+            TMX[nd] += mp * px;
+            TMY[nd] += mp * py;
+            if (TCH[nd * 4] < 0) {
+              if (TBD[nd] < 0) {
+                TBD[nd] = p;
+                break;
+              }
+              if (d >= 30) break;
+              const q = TBD[nd];
+              TBD[nd] = -1;
+              const hs = THS[nd] * 0.5,
+                c0 = NNODE;
+              NNODE += 4;
+              for (let k = 0; k < 4; k++) {
+                const c = c0 + k;
+                TCH[nd * 4 + k] = c;
+                TCX[c] = TCX[nd] + (k & 1 ? hs : -hs);
+                TCY[c] = TCY[nd] + (k & 2 ? hs : -hs);
+                THS[c] = hs;
+                TM[c] = TMX[c] = TMY[c] = 0;
+                TBD[c] = -1;
+                TCH[c * 4] = TCH[c * 4 + 1] = TCH[c * 4 + 2] = TCH[c * 4 + 3] = -1;
+              }
+              const cq = TCH[nd * 4 + ((X[q] >= TCX[nd] ? 1 : 0) + (Y[q] >= TCY[nd] ? 2 : 0))];
+              TM[cq] += MS[q];
+              TMX[cq] += MS[q] * X[q];
+              TMY[cq] += MS[q] * Y[q];
+              TBD[cq] = q;
+            }
+            nd = TCH[nd * 4 + ((px >= TCX[nd] ? 1 : 0) + (py >= TCY[nd] ? 2 : 0))];
+            d++;
+          }
+        }
+        const th2 = 0.2025,
+          rmin2 = 4 * hm * sg * hm * sg;
+        let pe = 0;
+        for (let i = 0; i < n; i++) {
+          const xi = X[i],
+            yi = Y[i],
+            hi_ = H[i];
+          let gx = 0,
+            gy = 0,
+            phi = 0,
+            sp = 0;
+          TST[sp++] = 0;
+          while (sp > 0) {
+            const nd = TST[--sp];
+            if (TCH[nd * 4] < 0) {
+              const j = TBD[nd];
+              if (j < 0 || j === i) continue;
+              const dx = X[j] - xi,
+                dy = Y[j] - yi,
+                r2 = dx * dx + dy * dy + 1e-12,
+                hh = 0.5 * (hi_ + H[j]) * sg;
+              let g;
+              {
+                const rr = Math.sqrt(r2);
+                g = (r2 >= 4 * hh * hh ? 1 : GF(rr / hh)) / (r2 * rr);
+              }
+              const f = gg * MS[j] * g;
+              gx += f * dx;
+              gy += f * dy;
+              if (WE) phi -= MS[j] / Math.sqrt(r2 + 0.16 * hh * hh);
+              continue;
+            }
+            const m = TM[nd];
+            if (m <= 0) continue;
+            const dx = TMX[nd] / m - xi,
+              dy = TMY[nd] / m - yi,
+              r2 = dx * dx + dy * dy,
+              s2 = 4 * THS[nd] * THS[nd];
+            if (s2 < th2 * r2 && r2 > rmin2) {
+              const f = (gg * m) / (r2 * Math.sqrt(r2));
+              gx += f * dx;
+              gy += f * dy;
+              if (WE) phi -= m / Math.sqrt(r2);
+              continue;
+            }
+            for (let k = 0; k < 4; k++) {
+              const c = TCH[nd * 4 + k];
+              if (TM[c] > 0) TST[sp++] = c;
+            }
+          }
+          AX[i] += gx;
+          AY[i] += gy;
+          if (WE) pe += 0.5 * gg * MS[i] * phi;
+        }
+        if (WE) PETREE = pe;
+      }
+      let PETREE = 0;
+      function stepSim(maxdt) {
+        const HFN = q("hf").checked;
+        if (FRE.length < N) FRE = new Uint8Array(N + 64);
+        if (relax > 0 || !HFN) FRE.fill(0);
+        if (dtp > 0)
+          for (let i = 0; i < N; i++) {
+            VX[i] += 0.5 * dtp * AX0[i];
+            VY[i] += 0.5 * dtp * AY0[i];
+          }
+        let a = 1e9,
+          b = 1e9,
+          A = -1e9,
+          B = -1e9,
+          hm = 0;
+        for (let i = 0; i < N; i++) {
+          const x = X[i],
+            y = Y[i];
+          if (x < a) a = x;
+          if (x > A) A = x;
+          if (y < b) b = y;
+          if (y > B) B = y;
+          if (H[i] > hm) hm = H[i];
+        }
+        const cs = Math.max(2.3 * hm, Math.max(A - a, B - b) / 120),
+          nx = (((A - a) / cs) | 0) + 1,
+          ny = (((B - b) / cs) | 0) + 1;
+        head.fill(-1, 0, nx * ny);
+        for (let i = 0; i < N; i++) {
+          const k = (((X[i] - a) / cs) | 0) + nx * (((Y[i] - b) / cs) | 0);
+          cellOf[i] = k;
+          nxt[i] = head[k];
+          head[k] = i;
+        }
+        NC.fill(0);
+        for (let i = 0; i < N; i++) {
+          const k = cellOf[i],
+            ci = k % nx,
+            cj = (k / nx) | 0;
+          for (let dj = -1; dj < 2; dj++) {
+            const yj = cj + dj;
+            if (yj < 0 || yj >= ny) continue;
+            for (let di = -1; di < 2; di++) {
+              const xi = ci + di;
+              if (xi < 0 || xi >= nx) continue;
+              for (let j = head[xi + nx * yj]; j >= 0; j = nxt[j]) {
+                if (j <= i) continue;
+                const dx = X[i] - X[j],
+                  dy = Y[i] - Y[j],
+                  rr = 2.3 * Math.max(H[i], H[j], HMN);
+                if (dx * dx + dy * dy < rr * rr && NC[i] < CAP && NC[j] < CAP) {
+                  NL[i * CAP + NC[i]++] = j;
+                  NL[j * CAP + NC[j]++] = i;
+                }
+              }
+            }
+          }
+        }
+        for (let i = 0; i < N; i++) {
+          const h = H[i],
+            h3 = 10 / (7 * PI * h * h);
+          let s = MS[i] * h3,
+            gs = 2 * MS[i] * h3;
+          for (let n = 0, o = i * CAP; n < NC[i]; n++) {
+            const j = NL[o + n],
+              dx = X[i] - X[j],
+              dy = Y[i] - Y[j],
+              r = Math.sqrt(dx * dx + dy * dy) / h;
+            const wj = IC && MA[j] !== MA[i] ? RW[MA[i] * 3 + MA[j]] : 1;
+            if (r < 1) {
+              s += wj * MS[j] * h3 * (1 - 1.5 * r * r + 0.75 * r * r * r);
+              gs += wj * MS[j] * h3 * (2 - 6 * r * r + 3.75 * r * r * r);
+            } else if (r < 2) {
+              s += wj * MS[j] * h3 * 0.25 * (2 - r) ** 3;
+              gs += wj * MS[j] * h3 * (2 - r) ** 2 * (1 - 1.25 * r);
+            }
+          }
+          RHO[i] = Math.max(s, 1e-3);
+          GH[i] = GHON
+            ? Math.min(1.6, Math.max(0.6, 1 / Math.max(0.2, 1 - (0.5 * gs) / RHO[i])))
+            : 1;
+        }
+        for (let i = 0; i < N; i++) {
+          const h = H[i],
+            k = 10 / (7 * PI * h * h);
+          let sn = (MS[i] / RHO[i]) * k;
+          for (let n = 0, o = i * CAP; n < NC[i]; n++) {
+            const j = NL[o + n],
+              dx = X[i] - X[j],
+              dy = Y[i] - Y[j],
+              r = Math.sqrt(dx * dx + dy * dy) / h;
+            if (r < 1) sn += (MS[j] / RHO[j]) * k * (1 - 1.5 * r * r + 0.75 * r * r * r);
+            else if (r < 2) sn += (MS[j] / RHO[j]) * k * 0.25 * (2 - r) ** 3;
+          }
+          NR[i] = RHO[i] / Math.min(1.5, Math.max(sn, 0.3));
+        }
+        for (let i = 0; i < N; i++) {
+          RHO[i] = NR[i];
+          if (HFN && relax == 0) {
+            const rr = RHO[i] / MT[MA[i]].r0;
+            if (rr < 0.25) FRE[i] = 1;
+            else if (rr > 0.5) FRE[i] = 0;
+          }
+          const hn = ETA * Math.sqrt(MS[i] / RHO[i]);
+          H[i] = Math.min(0.35, Math.max(HMN, Math.min(1.12 * H[i], Math.max(0.88 * H[i], hn))));
+          if (relax > 0) U[i] = u0f(i);
+          eos(i);
+          AX[i] = AY[i] = DU[i] = 0;
+        }
+        for (let i = 0; i < N; i++) {
+          const hi = H[i],
+            k1 = 10 / (7 * PI * hi ** 3);
+          let dv = 0,
+            cu = 0,
+            gxx = 0,
+            gxy = 0,
+            gyx = 0,
+            gyy = 0,
+            mxx = 0,
+            mxy = 0,
+            myx = 0,
+            myy = 0;
+          for (let n = 0, o = i * CAP; n < NC[i]; n++) {
+            const j = NL[o + n],
+              dx = X[i] - X[j],
+              dy = Y[i] - Y[j],
+              r = Math.sqrt(dx * dx + dy * dy),
+              qq = r / hi;
+            if (r < 1e-9 || qq >= 2) continue;
+            const dW = qq < 1 ? (-3 * qq + 2.25 * qq * qq) * k1 : -0.75 * (2 - qq) ** 2 * k1,
+              dvx = VX[i] - VX[j],
+              dvy = VY[i] - VY[j],
+              f = (MS[j] * dW) / r;
+            dv -= f * (dvx * dx + dvy * dy);
+            cu -= f * (dvx * dy - dvy * dx);
+            if (RH) {
+              const g = ((dW / r) * MS[j]) / RHO[j];
+              gxx += g * dvx * dx;
+              gxy += g * dvx * dy;
+              gyx += g * dvy * dx;
+              gyy += g * dvy * dy;
+              mxx += g * dx * dx;
+              mxy += g * dx * dy;
+              myx += g * dy * dx;
+              myy += g * dy * dy;
+            }
+          }
+          if (RH) {
+            /* OpenSPH correction tensor: L = G·M^-1 (first-order consistent gradient) */ const det =
+              mxx * myy - mxy * myx;
+            let a = -gxx,
+              b = -gxy,
+              c2 = -gyx,
+              d = -gyy;
+            if (Math.abs(det) > 0.2 * Math.abs(mxx * myy) + 1e-12 && Math.abs(det) > 1e-12) {
+              const id = 1 / det;
+              a = (gxx * myy - gxy * myx) * id;
+              b = (-gxx * mxy + gxy * mxx) * id;
+              c2 = (gyx * myy - gyy * myx) * id;
+              d = (-gyx * mxy + gyy * mxx) * id;
+            }
+            GXX[i] = a;
+            GXY[i] = b;
+            GYX[i] = c2;
+            GYY[i] = d;
+          }
+          dv /= RHO[i];
+          cu /= RHO[i];
+          DIV[i] = dv;
+          BAL[i] = Math.abs(dv) / (Math.abs(dv) + Math.abs(cu) + (1e-4 * C[i]) / hi);
+        }
+        let dtm = 0.3;
+        const DCU = 0.9 * Math.sqrt(PM / 0.343),
+          DCN = DCU * 0.6;
+        for (let i = 0; i < N; i++) {
+          const hi = H[i],
+            pi = P[i] / (RHO[i] * RHO[i]),
+            ri2 = 1 / (RHO[i] * RHO[i]),
+            sxi = SXX[i] * ri2,
+            sxyi = SXY[i] * ri2,
+            syi = SYY[i] * ri2;
+          let vs = C[i],
+            ax = 0,
+            ay = 0,
+            du = 0,
+            xvx = 0,
+            xvy = 0,
+            vrm = 0;
+          for (let n = 0, o = i * CAP; n < NC[i]; n++) {
+            const j = NL[o + n],
+              dx = X[i] - X[j],
+              dy = Y[i] - Y[j],
+              r2 = dx * dx + dy * dy,
+              r = Math.sqrt(r2),
+              hj = H[j];
+            if (r < 1e-9) continue;
+            let dW = 0,
+              dWi = 0,
+              dWj = 0,
+              q1 = r / hi,
+              q2 = r / hj;
+            const k1 = 10 / (7 * PI * hi ** 3),
+              k2 = 10 / (7 * PI * hj ** 3);
+            if (q1 < 1) dWi = (-3 * q1 + 2.25 * q1 * q1) * k1;
+            else if (q1 < 2) dWi = -0.75 * (2 - q1) ** 2 * k1;
+            if (q2 < 1) dWj = (-3 * q2 + 2.25 * q2 * q2) * k2;
+            else if (q2 < 2) dWj = -0.75 * (2 - q2) ** 2 * k2;
+            dW = 0.5 * (dWi + dWj);
+            /* cohesion: short-range attraction between neighbours (peak at r = (hi+hj)/2, zero at r = hi+hj). Cancels in the bulk, so only free surfaces and fragments feel a net inward pull; weaker between unlike materials */
+            if (CHV > 0 || DCL > 0) {
+              const ex = Math.min(
+                  1,
+                  Math.max(0, (1 - 0.5 * (RHO[i] / MT[MA[i]].r0 + RHO[j] / MT[MA[j]].r0)) / 0.5),
+                ),
+                hs = (hi + hj) * (1 + 0.35 * Math.min(DCL, 3) * ex);
+              if (r < hs) {
+                const qh = r / hs,
+                  om = 1 - qh,
+                  sh = 64 * qh * qh * qh * om * om * om,
+                  mag =
+                    (CHK *
+                      (CHV + DCL * ex * 2.5) *
+                      (MA[i] === MA[j] ? 1 : 0.5) *
+                      0.5 *
+                      (CS0[MA[i]] + CS0[MA[j]]) *
+                      sh *
+                      MS[j]) /
+                    (0.5 * (RHO[i] + RHO[j])) /
+                    (hs * hs * hs) /
+                    r;
+                ax -= mag * dx;
+                ay -= mag * dy;
+              }
+            }
+            if (dW == 0) continue;
+            const dvx = VX[i] - VX[j],
+              dvy = VY[i] - VY[j],
+              vr = dvx * dx + dvy * dy;
+            let pv = 0;
+            const w1 =
+                q1 < 2
+                  ? q1 < 1
+                    ? 1 - 1.5 * q1 * q1 + 0.75 * q1 * q1 * q1
+                    : 0.25 * (2 - q1) ** 3
+                  : 0,
+              w2 =
+                q2 < 2
+                  ? q2 < 1
+                    ? 1 - 1.5 * q2 * q2 + 0.75 * q2 * q2 * q2
+                    : 0.25 * (2 - q2) ** 3
+                  : 0,
+              wa = 0.5 * (w1 * k1 * hi + w2 * k2 * hj),
+              rb = 0.5 * (RHO[i] + RHO[j]);
+            xvx -= (MS[j] / rb) * wa * dvx;
+            xvy -= (MS[j] / rb) * wa * dvy;
+            {
+              const vv = Math.sqrt(dvx * dvx + dvy * dvy);
+              if (vv > vrm) vrm = vv;
+            }
+            if (vr < 0) {
+              const hh = 0.5 * (hi + hj),
+                mu = (hh * vr) / (r2 + 0.01 * hh * hh),
+                cb = 0.5 * (C[i] + C[j]);
+              pv =
+                ((-0.5 * (ALP[i] + ALP[j]) * cb * mu + (ALP[i] + ALP[j]) * mu * mu) /
+                  (0.5 * (RHO[i] + RHO[j]))) *
+                0.5 *
+                (BAL[i] + BAL[j]);
+              const w = vr / r,
+                vsg = C[i] + C[j] - 3 * w;
+              if (vsg > vs) vs = vsg;
+            }
+            if (FRE[i] && FRE[j]) continue;
+            let as = 0;
+            {
+              const pj = P[j] / (RHO[j] * RHO[j]);
+              if (pi < 0 || pj < 0) {
+                const hm = 0.5 * (hi + hj),
+                  f = Math.min(1.5, wa / ((0.556 * 10) / (7 * PI * hm * hm)));
+                as = AS * ((pi < 0 ? -pi : 0) + (pj < 0 ? -pj : 0)) * f * f * f * f;
+              }
+            }
+            const pri = pi,
+              prj = P[j] / (RHO[j] * RHO[j]);
+            const pp = GHON ? (pri * GH[i] * dWi + prj * GH[j] * dWj) / r : ((pri + prj) * dW) / r;
+            const t = MS[j] * (pp + ((pv + as) * dW) / r);
+            ax -= t * dx;
+            ay -= t * dy;
+            if (RH) {
+              const rj2 = 1 / (RHO[j] * RHO[j]),
+                ff = (MS[j] * dW) / r,
+                a1 = sxi + SXX[j] * rj2,
+                a2 = sxyi + SXY[j] * rj2,
+                a3 = syi + SYY[j] * rj2;
+              ax += ff * (a1 * dx + a2 * dy);
+              ay += ff * (a2 * dx + a3 * dy);
+            }
+            du +=
+              (MS[j] * (pi * (GHON ? GH[i] : 1) + 0.5 * pv) * vr * dW) / r +
+              (((MS[j] / rb) * AU * Math.abs(vr)) / r) * (U[i] - U[j]) * dW;
+          }
+          AX[i] += ax;
+          AY[i] += ay;
+          if (RH) {
+            const ex = 0.5 * (GXX[i] - GYY[i]),
+              exy = 0.5 * (GXY[i] + GYX[i]);
+            du += (SXX[i] * ex - SYY[i] * ex + 2 * SXY[i] * exy) / RHO[i];
+          }
+          DU[i] =
+            du -
+            (CL > 0 && relax == 0
+              ? CL *
+                (1 + 0.6 * DCL) *
+                0.3 *
+                Math.max(0, U[i] - u0f(i)) *
+                Math.min(1, Math.max(0, (1.15 - RHO[i] / MT[MA[i]].r0) / 0.65))
+              : 0);
+          XVX[i] = xvx;
+          XVY[i] = xvy;
+          const d1 = Math.min((0.35 * hi) / vs, (0.5 * DCN) / (vrm + 1e-9));
+          if (d1 < dtm) dtm = d1;
+        }
+        let pe = 0;
+        /* self-gravity: Newtonian 1/r^2 in the 2D plane (Keplerian orbits, escape possible) with SPH-kernel softening, so force is exactly Newtonian beyond 2h and only smoothed inside it */
+        if (TG && N > 1500) treeGravity(GG * GM, SGF);
+        else {
+          const gX = X,
+            gY = Y,
+            gA = AX,
+            gB = AY,
+            n = N,
+            gg = GG * GM,
+            sg = SGF;
+          for (let i = 0; i < n; i++) {
+            const xi = gX[i],
+              yi = gY[i],
+              hi_ = H[i];
+            let gx = 0,
+              gy = 0;
+            for (let j = i + 1; j < n; j++) {
+              const dx = gX[j] - xi,
+                dy = gY[j] - yi,
+                r2 = dx * dx + dy * dy + 1e-12,
+                hh = 0.5 * (hi_ + H[j]) * sg;
+              let g;
+              {
+                const rr = Math.sqrt(r2);
+                g = (r2 >= 4 * hh * hh ? 1 : GF(rr / hh)) / (r2 * rr);
+              }
+              const fi = gg * MS[j] * g,
+                fj = gg * MS[i] * g;
+              gx += fi * dx;
+              gy += fi * dy;
+              gA[j] -= fj * dx;
+              gB[j] -= fj * dy;
+            }
+            gA[i] += gx;
+            gB[i] += gy;
+          }
+          if (WE)
+            for (let i = 0; i < n; i++)
+              for (let j = i + 1; j < n; j++) {
+                const hh = 0.5 * (H[i] + H[j]) * sg,
+                  e = 0.16 * hh * hh;
+                pe -=
+                  (gg * MS[i] * MS[j]) / Math.sqrt((gX[j] - gX[i]) ** 2 + (gY[j] - gY[i]) ** 2 + e);
+              }
+        }
+        for (let i = 0; i < N; i++) {
+          const am = Math.sqrt(AX[i] ** 2 + AY[i] ** 2) + 1e-9,
+            d2 = 0.3 * Math.sqrt(Math.max(0.02, SGF * HMN) / am);
+          if (d2 < dtm) dtm = d2;
+        }
+        if (dtp > 0)
+          for (let i = 0; i < N; i++) {
+            VX[i] += 0.5 * dtp * (AX[i] - AX0[i]);
+            VY[i] += 0.5 * dtp * (AY[i] - AY0[i]);
+          }
+        if (WE) {
+          let ke = 0,
+            th = 0,
+            pxs = 0,
+            pys = 0,
+            L = 0;
+          for (let i = 0; i < N; i++) {
+            const vx = VX[i],
+              vy = VY[i];
+            ke += 0.5 * MS[i] * (vx * vx + vy * vy);
+            th += MS[i] * U[i];
+            pxs += MS[i] * vx;
+            pys += MS[i] * vy;
+            L += MS[i] * (X[i] * vy - Y[i] * vx);
+          }
+          ENOW = ke + th + (TG && N > 1500 ? PETREE : pe);
+          PNOW = Math.hypot(pxs, pys);
+          LNOW = L;
+          WE = false;
+        }
+        DTM = Math.max(dtm, 0.0003 * Math.min(1, HMN / 0.03));
+        dt = Math.min(DTM, maxdt);
+        const damp = relax > 0 ? 0.9 : 1;
+        for (let i = 0; i < N; i++) {
+          VX[i] = (VX[i] + 0.5 * dt * AX[i]) * damp;
+          VY[i] = (VY[i] + 0.5 * dt * AY[i]) * damp;
+          {
+            const w = VX[i] * VX[i] + VY[i] * VY[i];
+            if (w !== w) {
+              VX[i] = VY[i] = 0;
+            } else if (w > 100) {
+              const k = 10 / Math.sqrt(w);
+              VX[i] *= k;
+              VY[i] *= k;
+            }
+          }
+          AX0[i] = AX[i];
+          AY0[i] = AY[i];
+          {
+            const am = 0.25 * VA,
+              aM = 1.5 * VA;
+            if (relax > 0) ALP[i] = VA;
+            else {
+              const tau = H[i] / (0.2 * C[i] + 1e-9);
+              let a = ALP[i] + dt * (-(ALP[i] - am) / tau + Math.max(-(aM - ALP[i]) * DIV[i], 0));
+              ALP[i] = a < am ? am : a > aM ? aM : a;
+            }
+          }
+          OX[i] = X[i];
+          OY[i] = Y[i];
+          U[i] = Math.max(0.001, U[i] + DU[i] * dt);
+          X[i] += (VX[i] + XE * XVX[i]) * dt;
+          Y[i] += (VY[i] + XE * XVY[i]) * dt;
+        }
+        dtp = dt;
+        if (!RH || relax > 0) {
+          SXX.fill(0);
+          SYY.fill(0);
+          SXY.fill(0);
+          DMG.fill(0);
+        } else
+          for (let i = 0; i < N; i++) {
+            const m0 = ST[MA[i]],
+              m = {
+                mu: m0.mu,
+                Y0: Math.min(m0.Y0 * CHV, 0.9 * m0.YM),
+                YM: m0.YM,
+                mi: m0.mi,
+                md: m0.md,
+                sT: Math.max(1e-9, m0.sT * CHV),
+              },
+              ex = 0.5 * (GXX[i] - GYY[i]),
+              exy = 0.5 * (GXY[i] + GYX[i]),
+              w = 0.5 * (GXY[i] - GYX[i]);
+            let a = SXX[i],
+              b = SXY[i],
+              c2 = SYY[i];
+            const na = a + dt * (2 * m.mu * ex + 2 * w * b),
+              nb = b + dt * (2 * m.mu * exy + w * (c2 - a)),
+              nc = c2 + dt * (-2 * m.mu * ex - 2 * w * b);
+            a = na;
+            b = nb;
+            c2 = nc;
+            const Pp = Math.max(P[i], 0),
+              Yi = m.Y0 + (m.mi * Pp) / (1 + (m.mi * Pp) / Math.max(1e-9, m.YM - m.Y0)),
+              Yd = m.md * Pp,
+              Dm = DMG[i],
+              Y = Yi * (1 - Dm) + Yd * Dm;
+            const J = Math.sqrt(0.5 * (a * a + c2 * c2) + b * b);
+            if (J > Y) {
+              const f = Y / J;
+              a *= f;
+              b *= f;
+              c2 *= f;
+            }
+            /* tensile damage (simplified Grady-Kipp: crack growth at ~0.4 c_s once the tensile threshold is exceeded) */
+            const sig = -P[i] + Math.sqrt(a * a + b * b);
+            if (sig > m.sT && Dm < 1)
+              DMG[i] = Math.min(1, Dm + ((dt * 0.13 * C[i]) / H[i]) * Math.min(1, sig / m.sT - 1));
+            SXX[i] = a;
+            SXY[i] = b;
+            SYY[i] = c2;
+          }
+        if (HFN && relax == 0)
+          for (let i = 0; i < N; i++) {
+            if (!FRE[i]) continue;
+            for (let n = 0, o = i * CAP; n < NC[i]; n++) {
+              const j = NL[o + n];
+              if (j < i || !FRE[j]) continue;
+              const dc = 0.5 * (DCM[MA[i]] + DCM[MA[j]]),
+                dx = X[i] - X[j],
+                dy = Y[i] - Y[j],
+                r2 = dx * dx + dy * dy;
+              if (r2 > 1.3225 * dc * dc || r2 < 1e-18) continue;
+              const r = Math.sqrt(r2),
+                dvx = VX[i] - VX[j],
+                dvy = VY[i] - VY[j],
+                v2 = dvx * dvx + dvy * dvy,
+                mt = MS[i] + MS[j];
+              if (v2 > (3 * GG * GM * mt) / Math.max(r, dc)) continue;
+              const mi = MS[i] / mt,
+                mj = MS[j] / mt,
+                cx = mi * VX[i] + mj * VX[j],
+                cy = mi * VY[i] + mj * VY[j],
+                e = 0.25;
+              VX[i] = cx + (VX[i] - cx) * e;
+              VY[i] = cy + (VY[i] - cy) * e;
+              VX[j] = cx + (VX[j] - cx) * e;
+              VY[j] = cy + (VY[j] - cy) * e;
+              const dE = ((0.5 * MS[i] * MS[j]) / mt) * v2 * (1 - e * e);
+              U[i] += dE / (2 * MS[i]);
+              U[j] += dE / (2 * MS[j]);
+            }
+          }
+        if (COL)
+          for (let ps = 0; ps < 2; ps++)
+            for (let i = 0; i < N; i++)
+              for (let n = 0, o = i * CAP; n < NC[i]; n++) {
+                const j = NL[o + n];
+                if (j < i) continue;
+                const dc = 0.5 * (DCM[MA[i]] + DCM[MA[j]]),
+                  rx = OX[i] - OX[j],
+                  ry = OY[i] - OY[j],
+                  ex = X[i] - X[j],
+                  ey = Y[i] - Y[j],
+                  ddx = ex - rx,
+                  ddy = ey - ry,
+                  dd = ddx * ddx + ddy * ddy;
+                let qx, qy, qr;
+                const r0 = Math.sqrt(rx * rx + ry * ry);
+                if (r0 < dc) {
+                  qx = rx;
+                  qy = ry;
+                  qr = r0;
+                  if (qr < 1e-9) {
+                    qx = ex;
+                    qy = ey;
+                    qr = Math.sqrt(qx * qx + qy * qy);
+                  }
+                } else {
+                  const bb = rx * ddx + ry * ddy,
+                    disc = bb * bb - dd * (r0 * r0 - dc * dc);
+                  if (dd < 1e-14 || disc < 0) continue;
+                  const tc = (-bb - Math.sqrt(disc)) / dd;
+                  if (tc < 0 || tc > 1) continue;
+                  qx = rx + tc * ddx;
+                  qy = ry + tc * ddy;
+                  qr = dc;
+                }
+                if (qr < 1e-9) {
+                  qx = 1;
+                  qy = 0;
+                  qr = 1;
+                }
+                const ux = qx / qr,
+                  uy = qy / qr,
+                  sep = ex * ux + ey * uy;
+                if (sep < dc) {
+                  const mv = 0.5 * (dc - sep);
+                  X[i] += ux * mv;
+                  Y[i] += uy * mv;
+                  X[j] -= ux * mv;
+                  Y[j] -= uy * mv;
+                }
+                const vn = (VX[i] - VX[j]) * ux + (VY[i] - VY[j]) * uy;
+                if (vn < 0) {
+                  const wi = MS[j] / (MS[i] + MS[j]),
+                    wj = 1 - wi;
+                  VX[i] -= wi * vn * ux;
+                  VY[i] -= wi * vn * uy;
+                  VX[j] += wj * vn * ux;
+                  VY[j] += wj * vn * uy;
+                  const hq = (vn * vn) / 80;
+                  U[i] += hq;
+                  U[j] += hq;
+                }
+              }
+        if (relax > 0) {
+          for (let i = 0; i < N; i++) U[i] = u0f(i);
+          if (--relax == 0) {
+            for (let i = 0; i < N; i++) {
+              VX[i] = BX[i];
+              VY[i] = BY[i];
+              U[i] = u0f(i);
+            }
+            dtp = 0;
+            AX0.fill(0);
+            AY0.fill(0);
+          }
+        } else {
+          T += dt;
+          steps++;
+        }
+      }
+      /* debris analysis: friend-of-friends clumps outside the remnant; the biggest one is the proto-satellite candidate */
+      function satFind(cx, cy, vx, vy, Rc, Mc) {
+        const idx = [];
+        for (let i = 0; i < N; i++) {
+          const r = Math.hypot(X[i] - cx, Y[i] - cy);
+          if (r >= Rc && r < 8 * RT) idx.push(i);
+        }
+        if (idx.length < 6) return null;
+        const L = LNK,
+          L2 = L * L,
+          par = new Int32Array(N).fill(-1),
+          g = new Map(),
+          cl = (v) => Math.floor(v / L);
+        for (const i of idx) {
+          par[i] = i;
+          const k = (cl(X[i]) + 32768) * 65536 + cl(Y[i]) + 32768;
+          (g.get(k) || g.set(k, []).get(k)).push(i);
+        }
+        const find = (i) => {
+          while (par[i] !== i) {
+            par[i] = par[par[i]];
+            i = par[i];
+          }
+          return i;
+        };
+        for (const i of idx) {
+          const a = cl(X[i]),
+            b = cl(Y[i]);
+          for (let u = -1; u < 2; u++)
+            for (let v = -1; v < 2; v++) {
+              const c = g.get((a + u + 32768) * 65536 + b + v + 32768);
+              if (!c) continue;
+              for (const j of c) {
+                if (j <= i) continue;
+                const dx = X[i] - X[j],
+                  dy = Y[i] - Y[j];
+                if (dx * dx + dy * dy < L2) {
+                  const ri = find(i),
+                    rj = find(j);
+                  if (ri !== rj) par[ri] = rj;
+                }
+              }
+            }
+        }
+        const cm = new Map();
+        for (const i of idx) {
+          const r = find(i);
+          let o = cm.get(r);
+          if (!o) {
+            o = { n: 0, m: 0, x: 0, y: 0, vx: 0, vy: 0, fe: 0 };
+            cm.set(r, o);
+          }
+          o.n++;
+          o.m += MS[i];
+          o.x += MS[i] * X[i];
+          o.y += MS[i] * Y[i];
+          o.vx += MS[i] * VX[i];
+          o.vy += MS[i] * VY[i];
+          if (MA[i] == 1) o.fe += MS[i];
+        }
+        let best = null,
+          nc = 0;
+        for (const o of cm.values()) {
+          if (o.n < 6) continue;
+          nc++;
+          if (!best || o.m > best.m) best = o;
+        }
+        if (!best) return null;
+        const m = best.m,
+          x = best.x / m - cx,
+          y = best.y / m - cy,
+          u = best.vx / m - vx,
+          v = best.vy / m - vy;
+        return {
+          m,
+          n: best.n,
+          nc,
+          px: best.x / m,
+          py: best.y / m,
+          pvx: best.vx / m,
+          pvy: best.vy / m,
+          dist: Math.hypot(x, y),
+          rc: (x * v - y * u) ** 2 / (GG * (Mc || 1)),
+          fe: best.fe / m,
+        };
+      }
+      function calc() {
+        let cx = 0,
+          cy = 0,
+          m = 0;
+        for (let i = 0; i < N; i++)
+          if (RHO[i] > 0.8 * MT[MA[i]].r0) {
+            cx += X[i];
+            cy += Y[i];
+            m++;
+          }
+        if (!m) return;
+        cx /= m;
+        cy /= m;
+        const Rc = 1.6 * RT;
+        let Mc = 0;
+        for (let k = 0; k < 4; k++) {
+          let sx = 0,
+            sy = 0;
+          m = 0;
+          for (let i = 0; i < N; i++) {
+            if (Math.hypot(X[i] - cx, Y[i] - cy) < Rc) {
+              sx += X[i];
+              sy += Y[i];
+              m++;
+            }
+          }
+          if (m) {
+            cx = sx / m;
+            cy = sy / m;
+            Mc = m * PM;
+          }
+        }
+        let vx = 0,
+          vy = 0,
+          mm = 0;
+        for (let i = 0; i < N; i++)
+          if (Math.hypot(X[i] - cx, Y[i] - cy) < Rc) {
+            vx += VX[i];
+            vy += VY[i];
+            mm++;
+          }
+        mm = mm || 1;
+        vx /= mm;
+        vy /= mm;
+        let rem = 0,
+          dsk = 0,
+          esc = 0,
+          dfe = 0,
+          tmax = 0,
+          ib = 0,
+          nB1 = 0;
+        for (let i = 0; i < N; i++) {
+          const x = X[i] - cx,
+            y = Y[i] - cy,
+            r = Math.hypot(x, y),
+            u = VX[i] - vx,
+            v = VY[i] - vy;
+          const tK = tempK(i);
+          if (tK > tmax) tmax = tK;
+          if (BD[i] == 1) nB1++;
+          if (r < Rc) {
+            if (BD[i] == 1) ib++;
+            rem++;
+            continue;
+          }
+          if (r > 8 * RT) {
+            esc++;
+            continue;
+          }
+          const rc = (x * v - y * u) ** 2 / (GG * (Mc || 1));
+          if (rc > 1.1 * RT) {
+            dsk++;
+            if (MA[i] == 1) dfe++;
+          } else rem++;
+        }
+        if (E0 === undefined && ENOW !== undefined) {
+          E0 = ENOW;
+          L0 = LNOW;
+        }
+        if (ib > 0.03 * nB1) IMPD = true;
+        const sat0 = satFind(cx, cy, vx, vy, Rc, Mc);
+        stat = {
+          sat: sat0,
+          dP: ((PNOW || 0) / MTOT) * 7.91,
+          dL: L0 === undefined ? 0 : (LNOW - L0) / Math.max(Math.abs(L0), 0.01),
+          dE: E0 === undefined || ENOW === undefined ? 0 : (ENOW - E0) / Math.abs(E0),
+          cx,
+          cy,
+          rem: rem * PM,
+          dsk: dsk * PM,
+          esc: esc * PM,
+          fe: dsk ? dfe / dsk : 0,
+          vx,
+          vy,
+          Mc,
+          Rc,
+          tmax,
+        };
+      }
+      const cv = q("cv"),
+        cx = cv.getContext("2d");
+      let yaw = 0,
+        pit = 0,
+        px = 0,
+        py = 0,
+        zoom = 1,
+        W = 0,
+        Hh = 0;
+      function rs() {
+        const d = Math.min(2, devicePixelRatio || 1);
+        W = cv.clientWidth;
+        Hh = cv.clientHeight;
+        cv.width = W * d;
+        cv.height = Hh * d;
+        cx.setTransform(d, 0, 0, d, 0, 0);
+      }
+      addEventListener("resize", rs);
+      new ResizeObserver(rs).observe(cv);
+      const ptr = new Map();
+      let pd = 0;
+      function toW(e) {
+        const sc = (zoom * Math.min(W, Hh)) / 13,
+          r = cv.getBoundingClientRect();
+        return [
+          vcx - px / sc + (e.clientX - r.left - W / 2) / sc,
+          vcy - py / sc + (e.clientY - r.top - Hh / 2) / sc,
+          sc,
+        ];
+      }
+      cv.onpointerdown = (e) => {
+        AF.checked = false;
+        cv.setPointerCapture(e.pointerId);
+        ptr.set(e.pointerId, [e.clientX, e.clientY]);
+        if (SB && edit && ptr.size == 1) {
+          const [x, y, sc] = toW(e);
+          let best = -1,
+            bd = 1e9;
+          objs.forEach((o, k) => {
+            const d = Math.hypot(o.x - x, o.y - y);
+            if (d < Math.max(objR(o), 14 / sc) && d < bd) {
+              bd = d;
+              best = k;
+            }
+          });
+          if (best >= 0) drag = { k: best, m: q("dm").value };
+        }
+      };
+      let dn = null;
+      cv.addEventListener("pointerdown", (e) => {
+        dn = [e.clientX, e.clientY];
+      });
+      function tapPlace(e) {
+        if (!(SB && edit && q("pm").checked && objs.length < 8)) return;
+        const sc = (zoom * Math.min(W, Hh)) / 13,
+          r = cv.getBoundingClientRect(),
+          wx = vcx - px / sc,
+          wy = vcy - py / sc;
+        objs.push({
+          x: wx + (e.clientX - r.left - W / 2) / sc,
+          y: wy + (e.clientY - r.top - Hh / 2) / sc,
+          m: +q("om").value,
+          cf: 0,
+          mant: "basalt",
+          ...placeV(
+            wx + (e.clientX - r.left - W / 2) / sc,
+            wy + (e.clientY - r.top - Hh / 2) / sc,
+            +q("om").value,
+          ),
+          sp: +q("oy").value,
+          cc: HUE[q("oh").value][0],
+          mc: HUE[q("oh").value][1],
+        });
+        q("oh").value = HN[(HN.indexOf(q("oh").value) + 1) % HN.length];
+        renderObjs();
+      }
+      cv.onpointerup = cv.onpointercancel = (e) => {
+        if (drag) {
+          drag = null;
+          renderObjs();
+          dn = null;
+          ptr.delete(e.pointerId);
+          pd = 0;
+          return;
+        }
+        if (
+          dn &&
+          ptr.size == 1 &&
+          e.type == "pointerup" &&
+          Math.hypot(e.clientX - dn[0], e.clientY - dn[1]) < 6
+        )
+          tapPlace(e);
+        dn = null;
+        ptr.delete(e.pointerId);
+        pd = 0;
+      };
+      function renderObjs() {
+        q("ol").innerHTML =
+          objs
+            .map((o, i) => {
+              return `<div class="ob"><i style="background:${o.mc};border-color:${o.cc}"></i><span>Body ${i + 1} · ${o.m} M⊕ · spin ${o.sp} · ${o.s} km/s</span><button data-i="${i}">Remove</button></div>`;
+            })
+            .join("") || "<small>No objects yet – tap the canvas.</small>";
+      }
+      q("ol").onclick = (e) => {
+        const i = e.target.dataset.i;
+        if (i !== undefined && edit) {
+          objs.splice(+i, 1);
+          renderObjs();
+        }
+      };
+      q("bl").onclick = () => {
+        if (!objs.length) return;
+        edit = false;
+        init();
+      };
+      q("be").onclick = () => {
+        edit = true;
+        init();
+      };
+      q("bc").onclick = () => {
+        objs = [];
+        edit = true;
+        renderObjs();
+        init();
+      };
+      const TPL = {
+        large: [1],
+        mid: [0.1],
+        small: [0.01],
+        tiny: [0.001],
+      };
+      q("tpl").onchange = () => {
+        const t = TPL[q("tpl").value];
+        if (!t) return;
+        q("om").value = t[0];
+        lbl();
+      };
+      cv.onpointermove = (e) => {
+        if (!ptr.has(e.pointerId)) return;
+        const o = ptr.get(e.pointerId);
+        if (drag) {
+          const [x, y] = toW(e),
+            ob = objs[drag.k];
+          if (drag.m == "m") {
+            ob.x = x;
+            ob.y = y;
+          } else {
+            const vx = (x - ob.x) / 3,
+              vy = (y - ob.y) / 3;
+            ob.s = Math.min(60, Math.round(Math.hypot(vx, vy) * VU * 10) / 10);
+            ob.d = Math.round(((Math.atan2(vy, vx) * 180) / PI + 360) % 360);
+          }
+          return;
+        }
+        if (ptr.size == 1) {
+          px += e.clientX - o[0];
+          py += e.clientY - o[1];
+        }
+        ptr.set(e.pointerId, [e.clientX, e.clientY]);
+        if (ptr.size == 2) {
+          const [p1, p2] = [...ptr.values()],
+            d = Math.hypot(p1[0] - p2[0], p1[1] - p2[1]);
+          if (pd) zoom = Math.max(0.2, Math.min(1e9, (zoom * d) / pd));
+          pd = d;
+        }
+      };
+      cv.onwheel = (e) => {
+        AF.checked = false;
+        e.preventDefault();
+        zoom = Math.max(0.2, Math.min(1e9, zoom * (e.deltaY < 0 ? 1.1 : 0.9)));
+      };
+      /* colour maps: temperature (log, 300 K to 30,000 K), density (rho / rho0, 0 to 2) */
+      const TSTOPS = [
+          [0, [30, 0, 140]],
+          [0.2, [120, 0, 200]],
+          [0.4, [225, 0, 130]],
+          [0.58, [255, 70, 0]],
+          [0.78, [255, 190, 0]],
+          [1, [255, 255, 160]],
+        ],
+        VSTOPS = [
+          [0, [110, 0, 200]],
+          [0.25, [20, 70, 255]],
+          [0.5, [0, 220, 230]],
+          [0.75, [90, 240, 40]],
+          [1, [255, 235, 0]],
+        ];
+      const tempT = (K) => (Math.log10(Math.max(300, K)) - 2.5) / 2;
+      function stopCol(S, t) {
+        t = Math.round(Math.max(0, Math.min(1, t)) * 63) / 63;
+        let k = 1;
+        while (k < S.length - 1 && t > S[k][0]) k++;
+        const a = S[k - 1],
+          b = S[k],
+          f = (t - a[0]) / (b[0] - a[0]);
+        return [
+          (a[1][0] + (b[1][0] - a[1][0]) * f) | 0,
+          (a[1][1] + (b[1][1] - a[1][1]) * f) | 0,
+          (a[1][2] + (b[1][2] - a[1][2]) * f) | 0,
+        ];
+      }
+      const CBS = {
+        1: {
+          title: "Temp K",
+          col: (t) => stopCol(TSTOPS, t),
+          ticks: [
+            [0, "300"],
+            [0.25, "1,000"],
+            [0.489, "3,000"],
+            [0.75, "10,000"],
+            [0.989, "30,000"],
+          ],
+        },
+        2: {
+          title: "Density ρ/ρ₀",
+          col: (t) => stopCol(VSTOPS, t),
+          ticks: [
+            [0, "0"],
+            [0.25, "0.5"],
+            [0.5, "1.0"],
+            [0.75, "1.5"],
+            [1, "2.0"],
+          ],
+        },
+      };
+      function cbar(c, w, h, vw) {
+        const sp = CBS[vw];
+        if (!sp) return;
+        const fs = Math.max(9, Math.min(12, (w / 50) | 0)),
+          bw = Math.max(5, Math.min(8, (w / 100) | 0)),
+          bh = h * 0.3,
+          y = (h - bh) / 2;
+        c.save();
+        c.font = `600 ${fs}px Verdana,Geneva,Arial,sans-serif`;
+        let tw = 0;
+        for (const t of sp.ticks) tw = Math.max(tw, c.measureText(t[1]).width);
+        const x = w - 10 - tw - 8 - bw,
+          g = c.createLinearGradient(0, y + bh, 0, y);
+        for (let i = 0; i <= 16; i++) {
+          const k = sp.col(i / 16);
+          g.addColorStop(i / 16, `rgb(${k[0]},${k[1]},${k[2]})`);
+        }
+        c.fillStyle = g;
+        c.fillRect(x, y, bw, bh);
+        c.strokeStyle = "#cbd2e0";
+        c.lineWidth = 1;
+        c.strokeRect(x + 0.5, y + 0.5, bw, bh);
+        c.fillStyle = "#e4e9f2";
+        c.textBaseline = "middle";
+        for (const [t, l] of sp.ticks) {
+          const ty = y + bh * (1 - t);
+          c.fillRect(x + bw, ty - 0.5, 3, 1);
+          c.fillText(l, x + bw + 6, ty);
+        }
+        c.textAlign = "right";
+        c.textBaseline = "alphabetic";
+        c.fillText(sp.title, w - 10, y - 16);
+        c.restore();
+      }
+      function satC(c, k) {
+        const l = 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2],
+          f = (v) => Math.max(0, Math.min(255, l + (v - l) * k)) | 0;
+        return [f(c[0]), f(c[1]), f(c[2])];
+      }
+      function colOf(i, vw, pal) {
+        const c = colOf0(i, vw, pal);
+        return vw == 0 ? satC(c, 1.8) : c;
+      }
+      function colOf0(i, vw, pal) {
+        const m = MT[MA[i]];
+        if (vw == 0) return CP[BD[i] * 2 + 1] || m.col;
+        if (vw == 1) return stopCol(TSTOPS, tempT(tempK(i)));
+        return stopCol(VSTOPS, RHO[i] / m.r0 / 2);
+      }
+      const CM = new Map(),
+        CS = [];
+      let IDX = new Uint16Array(0),
+        ORD = new Int32Array(0);
+      function cid(k) {
+        const key = ((k[0] | 0) << 16) | ((k[1] | 0) << 8) | (k[2] | 0);
+        let id = CM.get(key);
+        if (id === undefined) {
+          id = CS.length;
+          CS.push(`rgb(${k[0] | 0},${k[1] | 0},${k[2] | 0})`);
+          CM.set(key, id);
+        }
+        return id;
+      }
+
+      let BLG = [],
+        BLF = [],
+        BLN = 0,
+        BLV = null,
+        BLX = null,
+        BLB = null,
+        BLR = null;
+      /* per-particle displayed colour: diffuses between touching particles of the same material, relaxes back to its true colour */
+      let DR = new Float32Array(0),
+        DG = DR,
+        DB = DR,
+        CR = DR,
+        CG = DR,
+        CB = DR,
+        DKEY = "",
+        DN = -1,
+        DT = 0;
+      /* Shaded display colours, built in the OKLab perceptual colour space so contrast is the same for every hue.
+         Only the hue of an object's colour is kept. Lightness and chroma follow one shared curve of depth
+         (rr = 0 centre, 1 surface): a white core, a deep ring just outside it, then a mantle that lightens
+         toward a softly lit limb. The core is therefore always the same lightness step above the mantle,
+         whether the planet is blue, red, green or gold. Chroma is reduced only where a hue cannot reach it. */
+      const srgb2lin = (v) =>
+        (v /= 255) <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      const lin2srgb = (v) => {
+        v = Math.max(0, Math.min(1, v));
+        return 255 * (v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055);
+      };
+      function rgb2oklab(r, g, b) {
+        const R = srgb2lin(r),
+          G = srgb2lin(g),
+          B = srgb2lin(b),
+          l = Math.cbrt(0.4122214708 * R + 0.5363325363 * G + 0.0514459929 * B),
+          m = Math.cbrt(0.2119034982 * R + 0.6806995451 * G + 0.1073969566 * B),
+          s = Math.cbrt(0.0883024619 * R + 0.2817188376 * G + 0.6299787005 * B);
+        return [
+          0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+          1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+          0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+        ];
+      }
+      function oklab2lin(L, a, b) {
+        const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3,
+          m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3,
+          s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+        return [
+          4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+          -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+          -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+        ];
+      }
+      /* OKLCH to sRGB; if the colour is outside the sRGB gamut, chroma is reduced (lightness and hue are kept) */
+      function oklch2rgb(L, C, h) {
+        const ca = Math.cos(h),
+          sa = Math.sin(h),
+          fit = (c) => {
+            const q = oklab2lin(L, c * ca, c * sa);
+            return q.every((v) => v >= -0.001 && v <= 1.001) ? q : null;
+          };
+        let q = fit(C);
+        if (!q) {
+          let lo = 0,
+            hi = C;
+          for (let i = 0; i < 10; i++) {
+            const mid = (lo + hi) / 2;
+            if (fit(mid)) lo = mid;
+            else hi = mid;
+          }
+          q = oklab2lin(L, lo * ca, lo * sa);
+        }
+        return [lin2srgb(q[0]), lin2srgb(q[1]), lin2srgb(q[2])];
+      }
+      const smooth01 = (t) => {
+        t = Math.max(0, Math.min(1, t));
+        return t * t * (3 - 2 * t);
+      };
+      /* mantle lightness and chroma by depth: [depth, OKLab lightness, OKLab chroma] */
+      const SHM = [
+        [0, 0.6, 0.27],
+        [0.62, 0.64, 0.28],
+        [0.85, 0.72, 0.27],
+        [0.95, 0.8, 0.23],
+        [1, 0.87, 0.16],
+      ];
+      const CORE_L = 0.985,
+        CORE_R = 0.56,
+        CORE_EDGE = 0.16 /* the core is white inside CORE_R - CORE_EDGE and gone by CORE_R */,
+        SHC = new Map();
+      /* the most vivid lightness of each hue (OKLab): blue peaks low, yellow high. The pale outer rim is set relative to it,
+         so every colour gets the same bright edge the blue planet has */
+      const LPK = [
+        [0, 0.64],
+        [30, 0.66],
+        [55, 0.74],
+        [95, 0.88],
+        [145, 0.84],
+        [195, 0.83],
+        [265, 0.5],
+        [305, 0.53],
+        [335, 0.63],
+        [360, 0.64],
+      ];
+      const lpOf = (hd) => {
+        hd = ((hd % 360) + 360) % 360;
+        let k = 1;
+        while (k < LPK.length - 1 && hd > LPK[k][0]) k++;
+        const a = LPK[k - 1],
+          z = LPK[k];
+        return a[1] + ((z[1] - a[1]) * (hd - a[0])) / (z[0] - a[0]);
+      };
+      const shc = (rr, r, g, b) => {
+        rr = Math.max(0, Math.min(1, rr));
+        const key = (((r | 0) * 256 + (g | 0)) * 256 + (b | 0)) * 256 + ((rr * 255) | 0),
+          hit = SHC.get(key);
+        if (hit) return hit;
+        const lab = rgb2oklab(r, g, b),
+          Cin = Math.hypot(lab[1], lab[2]),
+          h = Math.atan2(lab[2], lab[1]);
+        let k = 1;
+        while (k < SHM.length - 1 && rr > SHM[k][0]) k++;
+        const a = SHM[k - 1],
+          z = SHM[k],
+          f = Math.max(0, Math.min(1, (rr - a[0]) / (z[0] - a[0]))),
+          Lm0 = a[1] + (z[1] - a[1]) * f,
+          hd = (h * 180) / Math.PI,
+          yw = Math.exp(-(((hd - 95) / 32) ** 2)) /* how yellow the hue is */,
+          lp = lpOf(hd),
+          Lm1 = Lm0 + (lp + (0.97 - lp) * 0.74 - 0.87) * smooth01((Lm0 - 0.6) / 0.27) /* same bright rim for every hue */,
+          Lm = Lm1 + Math.max(0, 0.9 - Lm1) * yw * 0.75 /* dark yellow looks olive-green, so yellow keeps a bright mantle */,
+          Cm =
+            (a[2] + (z[2] - a[2]) * f) *
+            Math.min(1, Cin / 0.08) /* washed-out blends stay washed out */,
+          core = smooth01((CORE_R - rr) / CORE_EDGE),
+          out = oklch2rgb(Lm + (CORE_L - Lm) * core, Cm * (1 - core) + 0.012 * core, h - yw * 0.35 * (1 - rr) /* deeper yellow turns amber, not green */);
+        if (SHC.size > 60000) SHC.clear();
+        SHC.set(key, out);
+        return out;
+      };
+      let ER = new Float32Array(0),
+        EG = ER,
+        EB = ER;
+      function colorStep(L, vw, pal, adv) {
+        colorStep0(L, vw, pal, adv);
+        if (ER.length < N) {
+          ER = new Float32Array(N);
+          EG = new Float32Array(N);
+          EB = new Float32Array(N);
+        }
+        for (let i = 0; i < N; i++) {
+          if (vw == 0) {
+            const c = shc(RR[i], DR[i], DG[i], DB[i]);
+            ER[i] = c[0];
+            EG[i] = c[1];
+            EB[i] = c[2];
+          } else {
+            ER[i] = DR[i];
+            EG[i] = DG[i];
+            EB[i] = DB[i];
+          }
+        }
+      }
+      const shd = (i, vw, k) => {
+        if (vw != 0) return k;
+        const c = shc(RR[i], k[0], k[1], k[2]);
+        return [c[0] | 0, c[1] | 0, c[2] | 0];
+      };
+      /* temperature, density and pressure views are smoothed over neighbours and over time so they do not flicker */
+      function smoothField() {
+        const nr = new Float32Array(N),
+          ng = new Float32Array(N),
+          nb = new Float32Array(N),
+          k = REC ? 0.7 : 0.15;
+        for (let i = 0; i < N; i++) {
+          let sr = CR[i],
+            sg = CG[i],
+            sb = CB[i],
+            sw = 1;
+          for (let n = 0, o = i * CAP; n < NC[i]; n++) {
+            const j = NL[o + n];
+            sr += CR[j];
+            sg += CG[j];
+            sb += CB[j];
+            sw++;
+          }
+          nr[i] = DR[i] + (sr / sw - DR[i]) * k;
+          ng[i] = DG[i] + (sg / sw - DG[i]) * k;
+          nb[i] = DB[i] + (sb / sw - DB[i]) * k;
+        }
+        DR.set(nr);
+        DG.set(ng);
+        DB.set(nb);
+      }
+      function colorStep0(L, vw, pal, adv) {
+        if (CR.length < N) {
+          CR = new Float32Array(N);
+          CG = new Float32Array(N);
+          CB = new Float32Array(N);
+          DR = new Float32Array(N);
+          DG = new Float32Array(N);
+          DB = new Float32Array(N);
+          DN = -1;
+        }
+        for (let i = 0; i < N; i++) {
+          const k = colOf(i, vw, pal);
+          CR[i] = k[0];
+          CG[i] = k[1];
+          CB[i] = k[2];
+        }
+        const key = vw + "_" + pal;
+        if (DN !== N || key !== DKEY || T < DT - 1e-9) {
+          DR.set(CR.subarray(0, N));
+          DG.set(CG.subarray(0, N));
+          DB.set(CB.subarray(0, N));
+          DN = N;
+          DKEY = key;
+          DT = T;
+          return;
+        }
+        if (vw > 0) {
+          smoothField();
+          DT = T;
+          return;
+        }
+        const dh = (Math.max(0, T - DT) * 809) / 3600;
+        DT = T;
+        if (!adv || dh <= 0) return;
+        const ns = Math.min(4, Math.ceil(dh / 0.02)),
+          kd = 1 - Math.exp((-30 * +q("bx").value * dh) / ns),
+          kr = 1 - Math.exp((-2.5 * +q("br").value * dh) / ns);
+        for (let it = 0; it < ns; it++) mixPass(L, kd, kr);
+      }
+      function mixPass(L, kd, kr) {
+        const L2 = L * L,
+          g = new Map(),
+          cl = (v) => Math.floor(v / L);
+        for (let i = 0; i < N; i++) {
+          const k = (cl(X[i]) + 32768) * 65536 + cl(Y[i]) + 32768;
+          (g.get(k) || g.set(k, []).get(k)).push(i);
+        }
+        const nr = new Float32Array(N),
+          ng = new Float32Array(N),
+          nb = new Float32Array(N);
+        for (let i = 0; i < N; i++) {
+          const cx0 = cl(X[i]),
+            cy0 = cl(Y[i]);
+          let sw = 0,
+            sr = 0,
+            sg = 0,
+            sb = 0,
+            fw = 0;
+          for (let u = -1; u < 2; u++)
+            for (let v = -1; v < 2; v++) {
+              const a = g.get((cx0 + u + 32768) * 65536 + cy0 + v + 32768);
+              if (!a) continue;
+              for (const j of a) {
+                if (j === i || MA[j] !== MA[i]) continue;
+                const dx = X[i] - X[j],
+                  dy = Y[i] - Y[j],
+                  d2 = dx * dx + dy * dy;
+                if (d2 < L2) {
+                  const w = 1 - d2 / L2;
+                  sw += w;
+                  sr += w * DR[j];
+                  sg += w * DG[j];
+                  sb += w * DB[j];
+                  if (
+                    Math.abs(CR[i] - CR[j]) + Math.abs(CG[i] - CG[j]) + Math.abs(CB[i] - CB[j]) >
+                    25
+                  )
+                    fw += w;
+                }
+              }
+            }
+          let r = DR[i],
+            gg = DG[i],
+            bb = DB[i];
+          if (sw > 0) {
+            const f = kd * Math.min(1, sw / 2);
+            r += (sr / sw - r) * f;
+            gg += (sg / sw - gg) * f;
+            bb += (sb / sw - bb) * f;
+          }
+          const kk = kr * (fw > 0.3 ? 0.1 : 1);
+          r += (CR[i] - r) * kk;
+          gg += (CG[i] - gg) * kk;
+          bb += (CB[i] - bb) * kk;
+          nr[i] = r;
+          ng[i] = gg;
+          nb[i] = bb;
+        }
+        DR.set(nr);
+        DG.set(ng);
+        DB.set(nb);
+      }
+      function blobCalcSlow(L) {
+        const par = new Int32Array(N),
+          cs = L,
+          L2 = L * L,
+          g = new Map(),
+          cl = (v) => Math.max(-30000, Math.min(30000, Math.floor(v / cs)));
+        for (let i = 0; i < N; i++) par[i] = i;
+        const find = (i) => {
+          while (par[i] !== i) {
+            par[i] = par[par[i]];
+            i = par[i];
+          }
+          return i;
+        };
+        for (let i = 0; i < N; i++) {
+          const k = (cl(X[i]) + 32768) * 65536 + cl(Y[i]) + 32768;
+          (g.get(k) || g.set(k, []).get(k)).push(i);
+        }
+        for (let i = 0; i < N; i++) {
+          const cx0 = cl(X[i]),
+            cy0 = cl(Y[i]);
+          for (let u = -1; u < 2; u++)
+            for (let v = -1; v < 2; v++) {
+              const a = g.get((cx0 + u + 32768) * 65536 + cy0 + v + 32768);
+              if (!a) continue;
+              for (const j of a) {
+                if (j <= i) continue;
+                const dx = X[i] - X[j],
+                  dy = Y[i] - Y[j];
+                if (dx * dx + dy * dy < L2) {
+                  const ri = find(i),
+                    rj = find(j);
+                  if (ri !== rj) par[ri] = rj;
+                }
+              }
+            }
+        }
+        const gr = new Map();
+        for (let i = 0; i < N; i++) {
+          const r0 = find(i);
+          let o = gr.get(r0);
+          if (!o) {
+            o = { idx: [], m: [0, 0, 0] };
+            gr.set(r0, o);
+          }
+          o.idx.push(i);
+        }
+        BLG = [...gr.values()];
+        BLG.forEach((o) => {
+          for (const i of o.idx) {
+            o.m[0] += ER[i];
+            o.m[1] += EG[i];
+            o.m[2] += EB[i];
+          }
+          const n = o.idx.length;
+          o.m[0] /= n;
+          o.m[1] /= n;
+          o.m[2] /= n;
+        });
+        BLN = BLG.filter((o) => o.idx.length >= 3).length;
+      }
+      let BLH = new Int32Array(1),
+        BLNX = new Int32Array(1);
+      function blobCalc(L) {
+        let a = 1e30,
+          b = 1e30,
+          A = -1e30,
+          B = -1e30;
+        for (let i = 0; i < N; i++) {
+          const x = X[i],
+            y = Y[i];
+          if (x < a) a = x;
+          if (x > A) A = x;
+          if (y < b) b = y;
+          if (y > B) B = y;
+        }
+        const gx = Math.floor((A - a) / L) + 3,
+          gy = Math.floor((B - b) / L) + 3;
+        if (!(gx * gy <= 4e6)) return blobCalcSlow(L);
+        /* grid of linked lists (no per-cell allocation) + union-find over 3x3 neighbourhoods */
+        if (BLH.length < gx * gy) BLH = new Int32Array(gx * gy);
+        if (BLNX.length < N) BLNX = new Int32Array(N);
+        const head = BLH,
+          nx = BLNX,
+          par = new Int32Array(N),
+          L2 = L * L,
+          cc = new Int32Array(N);
+        head.fill(-1, 0, gx * gy);
+        for (let i = 0; i < N; i++) {
+          par[i] = i;
+          const c = Math.floor((X[i] - a) / L) + 1 + (Math.floor((Y[i] - b) / L) + 1) * gx;
+          cc[i] = c;
+          nx[i] = head[c];
+          head[c] = i;
+        }
+        const find = (i) => {
+          while (par[i] !== i) {
+            par[i] = par[par[i]];
+            i = par[i];
+          }
+          return i;
+        };
+        for (let i = 0; i < N; i++) {
+          const c = cc[i];
+          for (let v = -1; v < 2; v++)
+            for (let u = -1; u < 2; u++) {
+              let j = head[c + u + v * gx];
+              while (j >= 0) {
+                if (j > i) {
+                  const dx = X[i] - X[j],
+                    dy = Y[i] - Y[j];
+                  if (dx * dx + dy * dy < L2) {
+                    const ri = find(i),
+                      rj = find(j);
+                    if (ri !== rj) par[ri] = rj;
+                  }
+                }
+                j = nx[j];
+              }
+            }
+        }
+        const gi = new Int32Array(N).fill(-1);
+        BLG = [];
+        for (let i = 0; i < N; i++) {
+          const r = find(i);
+          let k = gi[r];
+          if (k < 0) {
+            k = gi[r] = BLG.length;
+            BLG.push({ idx: [], m: [0, 0, 0] });
+          }
+          BLG[k].idx.push(i);
+        }
+        BLG.forEach((o) => {
+          for (const i of o.idx) {
+            o.m[0] += ER[i];
+            o.m[1] += EG[i];
+            o.m[2] += EB[i];
+          }
+          const n = o.idx.length;
+          o.m[0] /= n;
+          o.m[1] /= n;
+          o.m[2] /= n;
+        });
+        BLN = BLG.filter((o) => o.idx.length >= 3).length;
+      }
+      function blobDraw(c, sc, w, h, wx, wy, vw, pal, r) {
+        const L = (+q("bt").value * RD) / 0.45,
+          main = c === cx;
+        if (main) colorStep(L, vw, pal, run && !(SB && edit) && relax == 0);
+        else if (DN !== N) colorStep(L, vw, pal, false);
+        if (
+          main
+            ? frameN % 3 == 0 || !BLG.length || BLG.reduce((a, o) => a + o.idx.length, 0) !== N
+            : true
+        )
+          blobCalc(L);
+        /* one global metaball field + sharply-weighted colour field. Output is rendered at device-pixel resolution (times the Blob Resolution setting); the field grid is as fine as the cost budget allows and is bilinearly sampled per output pixel */
+        const RS = Math.min(
+            (main ? Math.min(2, devicePixelRatio || 1) : 1) * +q("bq").value * BQA,
+            Math.sqrt(9e6 / Math.max(1, w * h)),
+          ),
+          W2 = w * RS,
+          H2 = h * RS,
+          s2 = sc * RS,
+          gw = Math.max(1, Math.ceil(W2)),
+          gh = Math.max(1, Math.ceil(H2));
+        let GC = Math.max(1, Math.ceil(Math.sqrt((W2 * H2) / 1.2e6)));
+        {
+          const rr = Math.max(2.4, L * s2);
+          GC = Math.max(GC, Math.ceil(Math.sqrt((N * 4 * rr * rr) / 3e7)));
+        }
+        const cw = Math.ceil(W2 / GC) + 1,
+          ch = Math.ceil(H2 / GC) + 1,
+          rc = Math.max(2.4, (L * s2) / GC),
+          T0 = 0.6,
+          AA = 0.16,
+          rc2 = rc * rc;
+        if (!BLV || BLV.width !== gw || BLV.height !== gh) {
+          BLV = document.createElement("canvas");
+          BLV.width = gw;
+          BLV.height = gh;
+          BLX = BLV.getContext("2d");
+          BLB = new Uint8ClampedArray(gw * gh * 4);
+          BLR = null;
+        }
+        const D = BLB,
+          small = [];
+        if (BLF.length && BLF[0].length === cw * ch) BLF.forEach((a) => a.fill(0));
+        else BLF = [0, 1, 2, 3, 4].map(() => new Float32Array(cw * ch));
+        const [F, FW, FR, FG, FB] = BLF;
+        for (const o of BLG) {
+          if (o.idx.length < 3) {
+            small.push(o);
+            continue;
+          }
+          for (const n of o.idx) {
+            const px = (W2 / 2 + (X[n] - wx) * s2) / GC,
+              py = (H2 / 2 + (Y[n] - wy) * s2) / GC;
+            const i0 = Math.max(0, Math.floor(px - rc)),
+              i1 = Math.min(cw, Math.ceil(px + rc)),
+              j0 = Math.max(0, Math.floor(py - rc)),
+              j1 = Math.min(ch, Math.ceil(py + rc));
+            const cr = ER[n],
+              cg = EG[n],
+              cb = EB[n];
+            for (let j = j0; j < j1; j++) {
+              const dy = j + 0.5 - py;
+              for (let i = i0; i < i1; i++) {
+                const dx = i + 0.5 - px,
+                  d2 = dx * dx + dy * dy;
+                if (d2 < rc2) {
+                  const qq = 1 - d2 / rc2,
+                    v = qq * qq,
+                    k = j * cw + i,
+                    wc = v * v * v;
+                  F[k] += v;
+                  FR[k] += wc * cr;
+                  FG[k] += wc * cg;
+                  FB[k] += wc * cb;
+                  FW[k] += wc;
+                }
+              }
+            }
+          }
+        }
+        /* occupied cell range per row, so only the pixels near the blobs are touched */
+        const rmn = new Int32Array(ch).fill(cw),
+          rmx = new Int32Array(ch).fill(-1);
+        let cy0 = ch,
+          cy1 = -1;
+        for (let j = 0; j < ch; j++) {
+          const o = j * cw;
+          for (let i = 0; i < cw; i++)
+            if (F[o + i] > 0) {
+              if (i < rmn[j]) rmn[j] = i;
+              rmx[j] = i;
+            }
+          if (rmx[j] >= 0) {
+            if (j < cy0) cy0 = j;
+            cy1 = j;
+          }
+        }
+        if (cy1 >= 0) {
+          let bx0 = cw,
+            bx1 = -1;
+          for (let j = cy0; j <= cy1; j++) {
+            if (rmn[j] < bx0) bx0 = rmn[j];
+            if (rmx[j] > bx1) bx1 = rmx[j];
+          }
+          let ux0 = Math.max(0, Math.floor((bx0 - 0.5) * GC - 0.5) - 2),
+            ux1 = Math.min(gw, Math.ceil((bx1 + 1.5) * GC - 0.5) + 2),
+            uy0 = Math.max(0, Math.floor((cy0 - 0.5) * GC - 0.5) - 2),
+            uy1 = Math.min(gh, Math.ceil((cy1 + 1.5) * GC - 0.5) + 2);
+          if (BLR) {
+            ux0 = Math.min(ux0, BLR[0]);
+            uy0 = Math.min(uy0, BLR[1]);
+            ux1 = Math.max(ux1, BLR[2]);
+            uy1 = Math.max(uy1, BLR[3]);
+          }
+          for (let Y = uy0; Y < uy1; Y++) {
+            D.fill(0, (Y * gw + ux0) * 4, (Y * gw + ux1) * 4);
+            let v = (Y + 0.5) / GC - 0.5,
+              j0 = Math.floor(v),
+              fy = v - j0;
+            if (j0 < 0) {
+              j0 = 0;
+              fy = 0;
+            } else if (j0 > ch - 2) {
+              j0 = ch - 2;
+              fy = 1;
+            }
+            const mn = Math.min(rmn[j0], rmn[j0 + 1]),
+              mx = Math.max(rmx[j0], rmx[j0 + 1]);
+            if (mx < 0) continue;
+            const xs = Math.max(0, Math.floor((mn - 0.5) * GC - 0.5) - 1),
+              xe = Math.min(gw, Math.ceil((mx + 1.5) * GC - 0.5) + 1);
+            for (let Xp = xs; Xp < xe; Xp++) {
+              let u = (Xp + 0.5) / GC - 0.5,
+                i0 = Math.floor(u),
+                fx = u - i0;
+              if (i0 < 0) {
+                i0 = 0;
+                fx = 0;
+              } else if (i0 > cw - 2) {
+                i0 = cw - 2;
+                fx = 1;
+              }
+              const k = j0 * cw + i0,
+                k2 = k + cw,
+                w00 = (1 - fx) * (1 - fy),
+                w10 = fx * (1 - fy),
+                w01 = (1 - fx) * fy,
+                w11 = fx * fy,
+                f = F[k] * w00 + F[k + 1] * w10 + F[k2] * w01 + F[k2 + 1] * w11;
+              if (f <= T0) continue;
+              const a = f >= T0 + AA ? 1 : (f - T0) / AA,
+                d = (Y * gw + Xp) * 4,
+                ww = FW[k] * w00 + FW[k + 1] * w10 + FW[k2] * w01 + FW[k2 + 1] * w11,
+                iw = ww > 0 ? 1 / ww : 0;
+              D[d] = (FR[k] * w00 + FR[k + 1] * w10 + FR[k2] * w01 + FR[k2 + 1] * w11) * iw;
+              D[d + 1] = (FG[k] * w00 + FG[k + 1] * w10 + FG[k2] * w01 + FG[k2 + 1] * w11) * iw;
+              D[d + 2] = (FB[k] * w00 + FB[k + 1] * w10 + FB[k2] * w01 + FB[k2 + 1] * w11) * iw;
+              D[d + 3] = a * 255;
+            }
+          }
+          BLR = [ux0, uy0, ux1, uy1];
+          try {
+            if (ux1 > ux0 && uy1 > uy0) {
+              BLX.clearRect(0, 0, gw, gh); /* nothing stale outside the redrawn area can bleed in at its edges */
+              BLX.putImageData(new ImageData(D, gw, gh), 0, 0, ux0, uy0, ux1 - ux0, uy1 - uy0);
+              c.save();
+              c.imageSmoothingEnabled = true;
+              c.imageSmoothingQuality = "high";
+              c.drawImage(
+                BLV,
+                ux0,
+                uy0,
+                ux1 - ux0,
+                uy1 - uy0,
+                ux0 / RS,
+                uy0 / RS,
+                (ux1 - ux0) / RS,
+                (uy1 - uy0) / RS,
+              );
+              c.restore();
+            }
+          } catch (e) {}
+        } else if (BLR) {
+          D.fill(0);
+          BLX.clearRect(0, 0, gw, gh);
+          BLR = null;
+        }
+        for (const o of small) {
+          c.fillStyle = `rgb(${o.m[0] | 0},${o.m[1] | 0},${o.m[2] | 0})`;
+          c.beginPath();
+          for (const i of o.idx) {
+            const x = w / 2 + (X[i] - wx) * sc,
+              y = h / 2 + (Y[i] - wy) * sc,
+              rr = Math.max(1.2, r * 0.85);
+            c.moveTo(x + rr, y);
+            c.arc(x, y, rr, 0, 6.2832);
+          }
+          c.fill();
+        }
+      }
+      function drawTo(c, w, h, sc, wx, wy, letter, under, cb) {
+        c.fillStyle = "#000";
+        c.fillRect(0, 0, w, h);
+        if (under) under();
+        const vw = +q("vw").value,
+          pal = +q("pal").value,
+          R0 = RD * +q("ps").value,
+          r = Math.max(1.2, R0 * sc),
+          rk = MT.map(() => 0.85);
+        if (IDX.length < N) {
+          IDX = new Uint16Array(N);
+          ORD = new Int32Array(N);
+        }
+        if (q("bm").checked && N) blobDraw(c, sc, w, h, wx, wy, vw, pal, r);
+        else {
+          for (let i = 0; i < N; i++) IDX[i] = cid(shd(i, vw, colOf(i, vw, pal)));
+          const K = CS.length,
+            st = new Int32Array(K + 1);
+          for (let i = 0; i < N; i++) st[IDX[i] + 1]++;
+          for (let k = 0; k < K; k++) st[k + 1] += st[k];
+          const ps = st.slice(0, K);
+          for (let i = 0; i < N; i++) ORD[ps[IDX[i]]++] = i;
+          let o = 0;
+          for (let k = 0; k < K; k++) {
+            if (st[k + 1] == o) continue;
+            c.fillStyle = CS[k];
+            c.beginPath();
+            for (; o < st[k + 1]; o++) {
+              const i = ORD[o];
+              const x = w / 2 + (X[i] - wx) * sc,
+                y = h / 2 + (Y[i] - wy) * sc;
+              const rr = Math.max(1.2, r * rk[MA[i]]);
+              c.moveTo(x + rr, y);
+              c.arc(x, y, rr, 0, 6.2832);
+            }
+            c.fill();
+          }
+        }
+        const fs = Math.max(11, (w / 28) | 0);
+        c.font = `700 ${fs}px Verdana,Geneva,Arial,sans-serif`;
+        c.fillStyle = "#e4e9f2";
+        if (letter)
+          otx(
+            c,
+            (letter === "-" ? "" : letter + " · ") + ((T * 809) / 3600).toFixed(1) + " h",
+            10,
+            fs + 6,
+          );
+        /* scale bar: largest round length that fits in 30% of the width (hidden if none does, so it can never stretch across the canvas) */
+        let km = 0;
+        for (const v of [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000])
+          if ((v / 6400) * sc <= w * 0.3) km = v;
+        const L = (km / 6400) * sc;
+        if (km && L >= 12) {
+          obar(c, 10, h - 14, L, 3, "#aaa");
+          c.font = `600 ${fs - 1}px Verdana,Geneva,Arial,sans-serif`;
+          otx(c, km.toLocaleString() + " km", 10, h - 20);
+        }
+        if (cb) cbar(c, w, h, vw);
+      }
+      function bbox() {
+        let a = 1e9,
+          b = 1e9,
+          A = -1e9,
+          B = -1e9;
+        for (let i = 0; i < N; i++) {
+          const x = X[i],
+            y = Y[i];
+          if (x < a) a = x;
+          if (x > A) A = x;
+          if (y < b) b = y;
+          if (y > B) B = y;
+        }
+        return N
+          ? [(a + A) / 2, (b + B) / 2, Math.max(A - a, B - b, 1e-9) / 2 + 2 * RD]
+          : [0, 0, 3];
+      }
+      function autofit() {
+        const [x0, y0, hf] = bbox(),
+          m = Math.min(W, Hh),
+          tz = Math.max(0.2, Math.min(1e9, ((m / (2 * hf * 1.12)) * 13) / m));
+        zoom += (tz - zoom) * 0.1;
+        px += (((vcx - x0) * zoom * m) / 13 - px) * 0.15;
+        py += (((vcy - y0) * zoom * m) / 13 - py) * 0.15;
+      }
+      function snap() {
+        if (!N) return;
+        const S = 480,
+          c = document.createElement("canvas");
+        c.width = c.height = S;
+        const L = String.fromCharCode(97 + (q("fig").children.length % 26));
+        let x0 = 0,
+          y0 = 0,
+          hf = (q("sw").value * 1000) / 6400 / 2,
+          sc = S / (2 * hf);
+        if (q("sf").value != "fix") {
+          [x0, y0, hf] = bbox();
+          sc = S / (2 * hf * 1.12);
+        }
+        drawTo(c.getContext("2d"), S, S, sc, x0, y0, L, null, q("cbs").checked);
+        c.onclick = () => {
+          q("lbi").src = c.toDataURL("image/png");
+          q("lb").hidden = false;
+        };
+        q("fig").appendChild(c);
+      }
+      function setSnaps() {
+        const v = +q("iv").value;
+        snapT = v
+          ? Array.from({ length: 24 }, (_, k) => (k + 1) * v)
+          : q("stt")
+              .value.split(",")
+              .map(parseFloat)
+              .filter(isFinite)
+              .sort((a, b) => a - b)
+              .slice(0, 24);
+        const h = (T * 809) / 3600;
+        snapI = snapT.findIndex((t) => t > h + 1e-9);
+        if (snapI < 0) snapI = snapT.length;
+        q("stt").parentNode.style.display = v ? "none" : "";
+      }
+      q("lb").onclick = () => (q("lb").hidden = true);
+      q("sn").onclick = snap;
+      q("cl").onclick = () => {
+        q("fig").innerHTML = "";
+      };
+      function prevBody(c, o, sx, sy, sc) {
+        const tot = objs.reduce((a, b) => a + b.m, 0) || 1,
+          n = Math.max(80, Math.round((+q("n").value * o.m) / tot)),
+          pm = o.m / n,
+          rc = 0,
+          R = objR(o),
+          r = Math.max(1.2, 0.5 * Math.sqrt(pm / 0.118) * +q("ps").value * sc);
+        const lat = (rho, r0, r1, col) => {
+          const a = Math.sqrt((2 * pm) / (1.7320508 * rho)),
+            K = Math.ceil(r1 / a) + 1;
+          c.fillStyle = col;
+          c.beginPath();
+          for (let j = -K; j <= K; j++)
+            for (let k = -K; k <= K; k++) {
+              const x = a * (k + 0.5 * (j & 1)),
+                y = a * 0.8660254 * j,
+                d = Math.hypot(x, y);
+              if (d >= r0 && d < r1) {
+                c.moveTo(sx + x * sc + r, sy + y * sc);
+                c.arc(sx + x * sc, sy + y * sc, r, 0, 6.2832);
+              }
+            }
+          c.fill();
+        };
+        const rg = h2r(o.mc),
+          EE = [0, 0.35, 0.62, 0.85, 1];
+        for (let k = 0; k < 4; k++) {
+          const sc = shc((EE[k] + EE[k + 1]) / 2, rg[0], rg[1], rg[2]);
+          lat(MT[0].r0, EE[k] * R, EE[k + 1] * R, `rgb(${sc[0] | 0},${sc[1] | 0},${sc[2] | 0})`);
+        }
+      }
+      function drawEdit(c, w, h, sc, wx, wy, under) {
+        c.fillStyle = "#000";
+        c.fillRect(0, 0, w, h);
+        c.strokeStyle = "#1a1a1a";
+        c.lineWidth = 1;
+        const gs = sc;
+        for (let x = (((w / 2 - wx * sc) % gs) + gs) % gs; x < w; x += gs) {
+          c.beginPath();
+          c.moveTo(x, 0);
+          c.lineTo(x, h);
+          c.stroke();
+        }
+        for (let y = (((h / 2 - wy * sc) % gs) + gs) % gs; y < h; y += gs) {
+          c.beginPath();
+          c.moveTo(0, y);
+          c.lineTo(w, y);
+          c.stroke();
+        }
+        if (under) under();
+        objs.forEach((o, k) => {
+          const sx = w / 2 + (o.x - wx) * sc,
+            sy = h / 2 + (o.y - wy) * sc;
+          prevBody(c, o, sx, sy, sc);
+          const v = (o.s / 7.91) * 3 * sc,
+            a = (o.d * PI) / 180;
+          c.lineCap = "round";
+          c.beginPath();
+          c.moveTo(sx, sy);
+          c.lineTo(sx + Math.cos(a) * v, sy + Math.sin(a) * v);
+          c.strokeStyle = "#fff";
+          c.lineWidth = 2;
+          c.stroke();
+          c.lineWidth = 1;
+          c.lineCap = "butt";
+          c.fillStyle = "#fff";
+          c.font = "12px Verdana,Geneva,Arial,sans-serif";
+        });
+        c.fillStyle = "#fff";
+        c.font = "12px Verdana,Geneva,Arial,sans-serif";
+        if (!objs.length) otx(c, "Tap here to place an object", 10, 20);
+        obar(c, 10, h - 14, 0.3125 * sc, 2.5, "#fff");
+        otx(c, "2,000 km", 10, h - 20);
+      }
+      const KM = 6400,
+        VU = 7.91,
+        nm = (k) => "Body " + (k + 1),
+        fk = (v) => Math.round(v * KM).toLocaleString(),
+        rgbs = (k) => (k ? `rgb(${k[0] | 0},${k[1] | 0},${k[2] | 0})` : "#aaa");
+      function bodyStates() {
+        const nb = SB ? objs.length : 2,
+          n = new Float64Array(nb),
+          all = new Float64Array(nb),
+          sx = new Float64Array(nb),
+          sy = new Float64Array(nb),
+          vx = new Float64Array(nb),
+          vy = new Float64Array(nb),
+          r2 = new Float64Array(nb),
+          tk = new Float64Array(nb);
+        for (let i = 0; i < N; i++) {
+          const k = BD[i];
+          if (k >= nb) continue;
+          all[k]++;
+          if (RHO[i] > 0.8 * MT[MA[i]].r0) {
+            n[k]++;
+            sx[k] += X[i];
+            sy[k] += Y[i];
+            vx[k] += VX[i];
+            vy[k] += VY[i];
+          }
+        }
+        for (let i = 0; i < N; i++) {
+          const k = BD[i];
+          if (k >= nb || n[k] < 8) continue;
+          tk[k] += tempK(i);
+          if (RHO[i] > 0.8 * MT[MA[i]].r0) {
+            const dx = X[i] - sx[k] / n[k],
+              dy = Y[i] - sy[k] / n[k];
+            r2[k] += dx * dx + dy * dy;
+          }
+        }
+        const o = [];
+        for (let k = 0; k < nb; k++)
+          if (n[k] >= 8)
+            o.push({
+              k,
+              x: sx[k] / n[k],
+              y: sy[k] / n[k],
+              vx: vx[k] / n[k],
+              vy: vy[k] / n[k],
+              m: all[k] * PM,
+              rad: Math.sqrt((2 * r2[k]) / n[k]),
+              T: tk[k] / all[k],
+              col: rgbs(CP[2 * k + 1]),
+            });
+        return o;
+      }
+      const ov = (o) => [
+          (o.s / VU) * Math.cos((o.d * PI) / 180),
+          (o.s / VU) * Math.sin((o.d * PI) / 180),
+        ],
+        prim = () => objs.reduce((a, o, i) => (o.m > objs[a].m ? i : a), 0);
+      function placeV(x, y, m) {
+        let s = +q("os").value,
+          d = +q("od").value;
+        const mode = q("omode").value;
+        if (mode && objs.length) {
+          const P = objs[prim()],
+            dx = x - P.x,
+            dy = y - P.y,
+            r = Math.hypot(dx, dy) || 1,
+            vc = Math.sqrt((GG * (P.m + m) * (1 - +q("oe").value)) / r),
+            ang = Math.atan2(dy, dx) + ((mode == "r" ? -1 : 1) * PI) / 2,
+            pv = ov(P),
+            vx = pv[0] + vc * Math.cos(ang),
+            vy = pv[1] + vc * Math.sin(ang);
+          s = Math.round(Math.hypot(vx, vy) * VU * 100) / 100;
+          d = Math.round((((Math.atan2(vy, vx) * 180) / PI + 360) % 360) * 10) / 10;
+        }
+        return { s, d };
+      }
+      function predict(B, hours) {
+        const n = B.length,
+          x = B.map((b) => b.x),
+          y = B.map((b) => b.y),
+          vx = B.map((b) => b.vx),
+          vy = B.map((b) => b.vy),
+          m = B.map((b) => b.m),
+          S = (() => {
+            let tm = 1e9;
+            for (let i = 0; i < B.length; i++)
+              for (let j = i + 1; j < B.length; j++) {
+                const r = Math.hypot(B[j].x - B[i].x, B[j].y - B[i].y) || 1,
+                  T0 = 2 * PI * r * Math.sqrt(r / (GG * (B[i].m + B[j].m)));
+                if (T0 < tm) tm = T0;
+              }
+            return Math.max(240, Math.min(1500, Math.ceil((hours * 3600) / 809 / (tm / 50))));
+          })(),
+          ds = (hours * 3600) / 809 / S,
+          P = B.map(() => []),
+          ax = new Float64Array(n),
+          ay = new Float64Array(n);
+        let imp = null,
+          t = 0;
+        const acc = () => {
+          ax.fill(0);
+          ay.fill(0);
+          for (let i = 0; i < n; i++)
+            for (let j = i + 1; j < n; j++) {
+              const dx = x[j] - x[i],
+                dy = y[j] - y[i],
+                e = 0.5 * Math.min(B[i].r, B[j].r),
+                r2 = dx * dx + dy * dy + e * e,
+                f = GG / (r2 * Math.sqrt(r2));
+              ax[i] += m[j] * f * dx;
+              ay[i] += m[j] * f * dy;
+              ax[j] -= m[i] * f * dx;
+              ay[j] -= m[i] * f * dy;
+            }
+        };
+        acc();
+        for (let s = 0; s <= S; s++) {
+          for (let i = 0; i < n; i++) P[i].push(x[i], y[i]);
+          if (s == S || imp) break;
+          let tt = 0,
+            g = 0;
+          while (tt < ds - 1e-9 && !imp && g++ < 400) {
+            let h = Math.min(0.05, ds - tt);
+            for (let i = 0; i < n; i++)
+              for (let j = i + 1; j < n; j++) {
+                const dx = x[j] - x[i],
+                  dy = y[j] - y[i],
+                  r = Math.hypot(dx, dy),
+                  vr = Math.hypot(vx[j] - vx[i], vy[j] - vy[i]);
+                h = Math.min(
+                  h,
+                  0.03 * Math.min(r / (vr + 1e-6), r / Math.sqrt(GG * (m[i] + m[j]))),
+                );
+              }
+            h = Math.max(h, 1e-4);
+            for (let i = 0; i < n; i++) {
+              vx[i] += 0.5 * h * ax[i];
+              vy[i] += 0.5 * h * ay[i];
+              x[i] += h * vx[i];
+              y[i] += h * vy[i];
+            }
+            acc();
+            for (let i = 0; i < n; i++) {
+              vx[i] += 0.5 * h * ax[i];
+              vy[i] += 0.5 * h * ay[i];
+            }
+            tt += h;
+            t += h;
+            for (let i = 0; i < n && !imp; i++)
+              for (let j = i + 1; j < n; j++)
+                if (Math.hypot(x[i] - x[j], y[i] - y[j]) < B[i].r + B[j].r) {
+                  imp = { t, i, j, x: (x[i] + x[j]) / 2, y: (y[i] + y[j]) / 2 };
+                  break;
+                }
+          }
+        }
+        return { P, imp };
+      }
+      function updTJ() {
+        const ed = SB && edit;
+        let B;
+        if (ed) {
+          const tot = objs.reduce((a, o) => a + o.m, 0) || 1;
+          let mx = 0,
+            my = 0;
+          objs.forEach((o) => {
+            const v = ov(o);
+            mx += (v[0] * o.m) / tot;
+            my += (v[1] * o.m) / tot;
+          });
+          B = objs.map((o, k) => {
+            const v = ov(o);
+            return {
+              k,
+              x: o.x,
+              y: o.y,
+              vx: v[0] - mx,
+              vy: v[1] - my,
+              m: o.m,
+              r: objR(o),
+              col: o.mc,
+            };
+          });
+        } else
+          B = bodyStates().map((b) => ({
+            ...b,
+            r: SB && objs[b.k] ? objR(objs[b.k]) : b.k ? RI : RT,
+          }));
+        LBS = B;
+        TJ = null;
+        if (!ed && !COLL)
+          for (let i = 0; i < B.length; i++)
+            for (let j = i + 1; j < B.length; j++)
+              if (Math.hypot(B[i].x - B[j].x, B[i].y - B[j].y) < B[i].r + B[j].r) COLL = true;
+        if (!ed && (IMPD || COLL)) {
+          const s = stat.sat;
+          if (!s || s.n < 10 || stat.Mc === undefined) return;
+          B = [
+            {
+              k: 90,
+              x: stat.cx,
+              y: stat.cy,
+              vx: stat.vx,
+              vy: stat.vy,
+              m: stat.Mc,
+              r: RT,
+              col: "#e5e7eb",
+            },
+            {
+              k: 91,
+              x: s.px,
+              y: s.py,
+              vx: s.pvx,
+              vy: s.pvy,
+              m: s.m,
+              r: Math.max(0.04, (LNK / 1.5) * Math.sqrt(s.n / PI)),
+              col: "#fbbf24",
+            },
+          ];
+        }
+        if (B.length < 2) return;
+        for (let i = 0; i < B.length; i++)
+          for (let j = i + 1; j < B.length; j++)
+            if (Math.hypot(B[i].x - B[j].x, B[i].y - B[j].y) < 0.9 * (B[i].r + B[j].r)) return;
+        TJ = { B, ...predict(B, +q("tl").value) };
+      }
+      function sp(c, p) {
+        const n = p.length;
+        if (n < 2) return;
+        c.moveTo(p[0][0], p[0][1]);
+        for (let i = 1; i < n - 1; i++)
+          c.quadraticCurveTo(
+            p[i][0],
+            p[i][1],
+            (p[i][0] + p[i + 1][0]) / 2,
+            (p[i][1] + p[i + 1][1]) / 2,
+          );
+        c.lineTo(p[n - 1][0], p[n - 1][1]);
+      }
+      function otx(c, t, x, y) {
+        c.fillText(t, x, y);
+      }
+      function obar(c, x, y, L, t, col) {
+        c.fillStyle = col;
+        c.fillRect(x, y, L, t);
+      }
+      function drawTraj(c, w, h, sc, wx, wy) {
+        if (!TJ) return;
+        const { B, P, imp } = TJ,
+          sx = (x) => w / 2 + (x - wx) * sc,
+          sy = (y) => h / 2 + (y - wy) * sc,
+          v = q("rf").value,
+          ri =
+            v == "b"
+              ? -1
+              : v == "p"
+                ? B.reduce((a, o, i) => (o.m > B[a].m ? i : a), 0)
+                : B.findIndex((o) => o.k == +v),
+          rx = (a, s) => (ri >= 0 ? a - P[ri][2 * s] + B[ri].x : a),
+          ry = (a, s) => (ri >= 0 ? a - P[ri][2 * s + 1] + B[ri].y : a);
+        c.save();
+        c.lineWidth = 1.5;
+        c.lineJoin = c.lineCap = "round";
+        const FB = SB && edit ? [] : bodyStates(),
+          rk = ri >= 0 ? B[ri].k : -1,
+          fr = rk >= 0 ? FB.find((o) => o.k == rk) : null,
+          dl = (b) => {
+            const fb = FB.find((o) => o.k == b.k);
+            return fb
+              ? [fb.x - b.x - (fr ? fr.x - B[ri].x : 0), fb.y - b.y - (fr ? fr.y - B[ri].y : 0)]
+              : [0, 0];
+          };
+        if (!(SB && edit) && B[0].k < 90) {
+          for (let i = 0; i < B.length; i++)
+            for (let j = i + 1; j < B.length; j++) {
+              const a = FB.find((o) => o.k == B[i].k),
+                b = FB.find((o) => o.k == B[j].k);
+              if (a && b && Math.hypot(a.x - b.x, a.y - b.y) < B[i].r + B[j].r) COLL = true;
+            }
+          if (COLL) {
+            c.restore();
+            TJ = null;
+            return;
+          }
+        }
+
+        c.restore();
+      }
+      const LBO = {};
+      function draw() {
+        if (AF.checked && !(SB && edit)) autofit();
+        const sc = (zoom * Math.min(W, Hh)) / 13,
+          wx = vcx - px / sc,
+          wy = vcy - py / sc,
+          ed = SB && edit,
+          tj = SB;
+        if (tj && (ed || relax == 0)) {
+          if (ed || frameN % 8 == 0 || !LBS) updTJ();
+        } else {
+          TJ = null;
+          LBS = null;
+        }
+        const und = () => {
+          if (tj && TJ) drawTraj(cx, W, Hh, sc, wx, wy);
+        };
+        if (ed) {
+          drawEdit(cx, W, Hh, sc, wx, wy, und);
+        } else {
+          drawTo(cx, W, Hh, sc, wx, wy, "", und, q("cbm").checked);
+        }
+      }
+      const fmM = (v) => (v >= 0.01 ? v.toFixed(3) : v.toExponential(2));
+      function upd() {
+        const h = (T * 809) / 3600,
+          ed = SB && edit,
+          row = (l, v) =>
+            `<div class="info-row"><span class="info-label">${l}</span><span class="info-value">${v}</span></div>`,
+          B = ed || relax > 0 ? [] : bodyStates(),
+          tot = ed ? objs.reduce((a, o) => a + o.m, 0) : MTOT,
+          E = ed ? undefined : ENOW,
+          Lm = ed ? undefined : LNOW;
+        q("pr").innerHTML =
+          row(
+            "Time",
+            relax > 0
+              ? "settling " + Math.round(100 * (1 - relax / RLX)) + "%"
+              : h.toFixed(2) + " h",
+          ) +
+          row("Sim speed", ed ? "–" : SPS.toFixed(2) + " h/s") +
+          (SB ? row("Bodies", objs.length) : "") +
+          row("Particles", N) +
+          (!ed && relax == 0 && stat.tmax
+            ? row("Hottest particle", Math.round(stat.tmax).toLocaleString() + " K")
+            : "") +
+          row("Total mass", fmM(tot) + " M⊕") +
+          row("Total energy", E === undefined ? "–" : (E * 373.7).toFixed(1) + " ×10³⁰ J") +
+          row(
+            "Angular momentum",
+            Lm === undefined ? "–" : (Lm * 30.2).toFixed(2) + " ×10³⁴ kg m²/s",
+          ) +
+          (SB
+            ? row(
+                "Next collision",
+                TJ && TJ.imp ? "in " + ((TJ.imp.t * 809) / 3600).toFixed(1) + " h" : "none",
+              )
+            : "");
+        const sel = q("sel"),
+          names = ed ? objs.map((o, k) => k) : B.map((b) => b.k),
+          sig = names.join();
+        if (sel.dataset.sig !== sig) {
+          sel.innerHTML = names.map((k) => `<option value="${k}">${nm(k)}</option>`).join("");
+          sel.dataset.sig = sig;
+        }
+        const kk = +sel.value || 0;
+        let m, rad, vk, Tk;
+        if (ed) {
+          const o = objs[kk];
+          if (o) {
+            m = o.m;
+            rad = objR(o);
+            vk = o.s;
+            Tk = TK;
+          }
+        } else {
+          const b = B.find((x) => x.k == kk);
+          if (b) {
+            m = b.m;
+            rad = b.rad;
+            vk = Math.hypot(b.vx, b.vy) * VU;
+            Tk = b.T;
+          }
+        }
+        q("bp").innerHTML = m
+          ? row("Mass", m.toFixed(3) + " M⊕") +
+            row("Radius", Math.round(rad * KM).toLocaleString() + " km") +
+            row(
+              "Density",
+              ((m * 5.972e24) / ((4 / 3) * PI * Math.pow(rad * 6.4e6, 3)) / 1000).toFixed(2) +
+                " g/cm³",
+            ) +
+            row("Surface gravity", ((9.78 * GG * GM * m) / (rad * rad)).toFixed(2) + " m/s²") +
+            row("Circular speed", (Math.sqrt((GG * GM * m) / rad) * VU).toFixed(1) + " km/s") +
+            row("Temperature", Math.round(Tk) + " K") +
+            row("Speed", vk.toFixed(1) + " km/s")
+          : "<small>No body yet</small>";
+      }
+      let SPS = 0,
+        TPR = 0,
+        BQA = 1,
+        ACT = 0,
+        DMS = 6,
+        WE = false,
+        ENOW,
+        PNOW,
+        LNOW,
+        L0,
+        dtp = 0,
+        DTM = 0.02,
+        tgt = 0,
+        eff = 1,
+        fps = 60,
+        last = performance.now();
+      const AF = q("af");
+      function frame() {
+        const now = performance.now(),
+          fd = Math.min(0.1, (now - last) / 1000);
+        last = now;
+        const MSB = Math.max(3, Math.min(13, 15 - DMS));
+        COL = q("co").checked;
+        IC = q("ic").checked;
+        GHON = q("gh").checked;
+        TG = q("tg").checked;
+        RH = q("rh").checked;
+        if (fd > 0) fps += (1 / fd - fps) * 0.05;
+        if (REC) recTick();
+        else if (run && !(SB && edit)) {
+          const t0 = performance.now(),
+            B = Math.min(30, Math.max(8, 0.75 * fd * 1000));
+          if (relax > 0) {
+            while (relax > 0 && performance.now() - t0 < B) stepSim(1);
+          } else {
+            while (performance.now() - t0 < MSB) stepSim(1);
+          }
+        }
+        if (fd > 0) SPS += (Math.max(0, ((T - TPR) * 809) / 3600 / fd) - SPS) * 0.1;
+        TPR = T;
+        while (snapI < snapT.length && (T * 809) / 3600 >= snapT[snapI]) {
+          snap();
+          snapI++;
+        }
+        if (run || (SB && edit) || now - ACT < 500 || frameN % 6 == 0) {
+          const td = performance.now();
+          draw();
+          DMS += (performance.now() - td - DMS) * 0.1;
+          BQA = Math.max(0.5, Math.min(1, BQA * (DMS > 14 ? 0.97 : DMS < 7 ? 1.01 : 1)));
+        }
+        frameN++;
+        if (frameN % 30 == 29 && relax == 0) WE = true;
+        if (frameN % 15 == 0) {
+          if (relax == 0 && frameN % 30 == 0) calc();
+          upd();
+        }
+        requestAnimationFrame(frame);
+      }
+      /* ---------- GIF / video recorder ---------- */
+      const MAXF = 400;
+      let REC = null,
+        MOVS = [],
+        PMV = null,
+        PIDX = 0,
+        PSH = -1,
+        PACC = 0,
+        PLAST = 0,
+        PRUN = true,
+        EXPB = false;
+      const tk = () => new Promise((r) => setTimeout(r, 0));
+      function movHint() {
+        const e = q("mhint");
+        if (!e) return;
+        const d = +q("md").value,
+          iv = +q("mi").value,
+          z = +q("mz").value,
+          n = Math.floor(d / iv + 1e-9) + 1,
+          c = Math.min(n, MAXF);
+        e.textContent =
+          c +
+          " frames, about " +
+          Math.round((c * z * z * 4) / 1e6) +
+          " MB of memory" +
+          (n > MAXF ? " (capped at " + MAXF + " frames, so the movie will be shorter)" : "");
+      }
+      q("mi").onchange = movHint;
+      function recStart() {
+        if (REC) return;
+        if (SB && edit) {
+          if (!objs.length) {
+            q("mst").textContent = "Add at least one object first.";
+            return;
+          }
+          edit = false;
+        }
+        init();
+        const iv = +q("mi").value,
+          n = Math.min(MAXF, Math.floor(+q("md").value / iv + 1e-9) + 1);
+        REC = { n, i: 0, iv, z: +q("mz").value, frames: [], stop: false };
+        run = true;
+        q("pl").textContent = "Pause";
+        q("mrec").disabled = true;
+        q("mst").textContent = "Settling the planets…";
+      }
+      function recTick() {
+        const R = REC;
+        if (!R) return;
+        if (R.stop) return recDone();
+        const t0 = performance.now();
+        if (relax > 0) {
+          while (relax > 0 && performance.now() - t0 < 20) stepSim(1);
+          return;
+        }
+        while (performance.now() - t0 < 20) {
+          const rem = (R.i * R.iv * 3600) / 809 - T;
+          if (rem > 1e-9) {
+            stepSim(rem);
+            continue;
+          }
+          recFrame();
+          if (R.i >= R.n) return recDone();
+        }
+        q("mst").textContent =
+          "Recording… frame " + R.i + " of " + R.n + " (" + ((T * 809) / 3600).toFixed(1) + " h)";
+      }
+      function recFrame() {
+        const R = REC,
+          S = R.z,
+          c = document.createElement("canvas");
+        c.width = c.height = S;
+        let x0 = 0,
+          y0 = 0,
+          hf = (+q("mw").value * 1000) / 6400 / 2,
+          sc = S / (2 * hf);
+        if (q("mcam").value != "fix") {
+          const [bx, by, bh] = bbox();
+          if (R.hf === undefined) {
+            R.cx = bx;
+            R.cy = by;
+            R.hf = bh;
+          } else {
+            R.cx += (bx - R.cx) * 0.3;
+            R.cy += (by - R.cy) * 0.3;
+            R.hf += (bh - R.hf) * 0.3;
+          }
+          x0 = R.cx;
+          y0 = R.cy;
+          sc = S / (2 * R.hf * 1.12);
+        }
+        colorStep((+q("bt").value * RD) / 0.45, +q("vw").value, 0, true);
+        const g = c.getContext("2d");
+        drawTo(g, S, S, sc, x0, y0, "-", null, q("mcb").checked);
+        R.frames.push(g.getImageData(0, 0, S, S));
+        R.i++;
+      }
+      function recDone() {
+        const R = REC;
+        REC = null;
+        q("mrec").disabled = false;
+        if (!R.frames.length) {
+          q("mst").textContent = "Recording cancelled.";
+          return;
+        }
+        const mv = { frames: R.frames, w: R.z, h: R.z, iv: R.iv };
+        MOVS.push(mv);
+        addMovCard(mv);
+        q("mst").textContent =
+          "Done: " + R.frames.length + " frames. Click a movie below to play it.";
+        openMov(mv);
+      }
+      function addMovCard(mv) {
+        const c = document.createElement("canvas"),
+          s = mv.w;
+        c.width = c.height = s;
+        const g = c.getContext("2d");
+        g.putImageData(mv.frames[0], 0, 0);
+        g.beginPath();
+        g.arc(s / 2, s / 2, s * 0.09, 0, 6.2832);
+        g.fillStyle = "rgba(0,0,0,.55)";
+        g.fill();
+        g.beginPath();
+        g.moveTo(s * 0.47, s * 0.44);
+        g.lineTo(s * 0.47, s * 0.56);
+        g.lineTo(s * 0.56, s * 0.5);
+        g.closePath();
+        g.fillStyle = "#fff";
+        g.fill();
+        g.font = `700 ${Math.max(11, (s / 28) | 0)}px Verdana,Geneva,Arial,sans-serif`;
+        g.fillText("Movie " + MOVS.length + " · " + mv.frames.length + " frames", 10, s / 28 + 6);
+        c.onclick = () => openMov(mv);
+        mv.card = c;
+        q("movs").appendChild(c);
+      }
+      function updPlayLbl() {
+        const fps = +q("pfps").value;
+        q("pfps_v").textContent =
+          fps + " fps" + (PMV ? " = " + (fps * PMV.iv).toFixed(2) + " sim hours per second" : "");
+      }
+      function openMov(mv) {
+        PMV = mv;
+        const c = q("mc");
+        c.width = mv.w;
+        c.height = mv.h;
+        q("pfr").max = mv.frames.length - 1;
+        PIDX = 0;
+        PSH = -1;
+        PACC = 0;
+        PRUN = true;
+        PLAST = performance.now();
+        q("ppl").textContent = "Pause";
+        q("pst").textContent = "";
+        q("mb").hidden = false;
+        updPlayLbl();
+        requestAnimationFrame(playTick);
+      }
+      function playTick(now) {
+        if (q("mb").hidden || !PMV) return;
+        const mv = PMV;
+        if (PRUN && mv.frames.length > 1) {
+          PACC += ((now - PLAST) * +q("pfps").value) / 1000;
+          const k = Math.floor(PACC);
+          PACC -= k;
+          PIDX = (PIDX + k) % mv.frames.length;
+        }
+        PLAST = now;
+        if (PIDX !== PSH) {
+          PSH = PIDX;
+          q("mc").getContext("2d").putImageData(mv.frames[PIDX], 0, 0);
+          q("pfr").value = PIDX;
+          q("pfr_v").textContent =
+            PIDX + 1 + " / " + mv.frames.length + " (" + (PIDX * mv.iv).toFixed(2) + " h)";
+        }
+        requestAnimationFrame(playTick);
+      }
+      function dl(blob, name) {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(a.href);
+          a.remove();
+        }, 4000);
+      }
+      /* GIF encoder: median-cut palette, LZW */
+      function gifPal(frames) {
+        const hist = new Uint32Array(32768),
+          ch = (k, c) => (c == 0 ? k >> 10 : c == 1 ? (k >> 5) & 31 : k & 31);
+        for (const f of frames) {
+          const d = f.data;
+          for (let i = 0; i < d.length; i += 16)
+            hist[((d[i] >> 3) << 10) | ((d[i + 1] >> 3) << 5) | (d[i + 2] >> 3)]++;
+        }
+        const cols = [];
+        for (let k = 0; k < 32768; k++) if (hist[k]) cols.push(k);
+        const boxes = [cols];
+        while (boxes.length < 256) {
+          let bi = -1,
+            bs = 1;
+          for (let i = 0; i < boxes.length; i++)
+            if (boxes[i].length > bs) {
+              bs = boxes[i].length;
+              bi = i;
+            }
+          if (bi < 0) break;
+          const b = boxes[bi];
+          let best = 0,
+            br = -1;
+          for (let c = 0; c < 3; c++) {
+            let lo = 31,
+              hi = 0;
+            for (const k of b) {
+              const v = ch(k, c);
+              if (v < lo) lo = v;
+              if (v > hi) hi = v;
+            }
+            if (hi - lo > br) {
+              br = hi - lo;
+              best = c;
+            }
+          }
+          b.sort((x, y) => ch(x, best) - ch(y, best));
+          let tot = 0;
+          for (const k of b) tot += hist[k];
+          let acc = 0,
+            m = 0;
+          for (; m < b.length - 1; m++) {
+            acc += hist[b[m]];
+            if (acc >= tot / 2) break;
+          }
+          m = Math.min(b.length - 2, m);
+          boxes.splice(bi, 1, b.slice(0, m + 1), b.slice(m + 1));
+        }
+        const e5 = (v) => (v << 3) | (v >> 2);
+        return boxes.map((b) => {
+          let w = 0,
+            r = 0,
+            g = 0,
+            bl = 0;
+          for (const k of b) {
+            const n = hist[k];
+            w += n;
+            r += n * e5(k >> 10);
+            g += n * e5((k >> 5) & 31);
+            bl += n * e5(k & 31);
+          }
+          return [Math.round(r / w), Math.round(g / w), Math.round(bl / w)];
+        });
+      }
+      function lzw(ix) {
+        const buf = [];
+        let bits = 0,
+          sh = 0,
+          len = 9,
+          next = 258,
+          tab = new Map();
+        const emit = (c) => {
+          bits |= c << sh;
+          sh += len;
+          while (sh >= 8) {
+            buf.push(bits & 255);
+            bits >>>= 8;
+            sh -= 8;
+          }
+        };
+        emit(256);
+        let cur = ix[0];
+        for (let i = 1; i < ix.length; i++) {
+          const k = ix[i],
+            key = (cur << 8) | k,
+            v = tab.get(key);
+          if (v !== undefined) {
+            cur = v;
+            continue;
+          }
+          emit(cur);
+          if (next === 4096) {
+            emit(256);
+            next = 258;
+            len = 9;
+            tab = new Map();
+          } else {
+            if (next >= 1 << len) len++;
+            tab.set(key, next++);
+          }
+          cur = k;
+        }
+        emit(cur);
+        emit(257);
+        if (sh > 0) buf.push(bits & 255);
+        return buf;
+      }
+      function gifBlocks(buf) {
+        const n = buf.length,
+          o = new Uint8Array(n + Math.ceil(n / 255) + 1);
+        let p = 0;
+        for (let i = 0; i < n; i += 255) {
+          const k = Math.min(255, n - i);
+          o[p++] = k;
+          for (let j = 0; j < k; j++) o[p++] = buf[i + j];
+        }
+        return o;
+      }
+      async function exportGif() {
+        const mv = PMV;
+        if (!mv || EXPB) return;
+        EXPB = true;
+        const st = q("pst");
+        try {
+          st.textContent = "Building colour palette…";
+          await tk();
+          const pal = gifPal(mv.frames),
+            lut = new Int16Array(32768).fill(-1),
+            w = mv.w,
+            h = mv.h,
+            delay = Math.max(2, Math.round(100 / +q("pfps").value)),
+            gct = new Uint8Array(768);
+          pal.forEach((c, i) => gct.set(c, i * 3));
+          const parts = [
+            new Uint8Array([71, 73, 70, 56, 57, 97, w & 255, w >> 8, h & 255, h >> 8, 0xf7, 0, 0]),
+            gct,
+            new Uint8Array([
+              0x21,
+              0xff,
+              0x0b,
+              ...[..."NETSCAPE2.0"].map((c) => c.charCodeAt(0)),
+              3,
+              1,
+              0,
+              0,
+              0,
+            ]),
+          ];
+          const e5 = (v) => (v << 3) | (v >> 2);
+          for (let f = 0; f < mv.frames.length; f++) {
+            st.textContent = "Encoding GIF… frame " + (f + 1) + " / " + mv.frames.length;
+            await tk();
+            const d = mv.frames[f].data,
+              ix = new Uint8Array(w * h);
+            for (let p = 0; p < w * h; p++) {
+              const key =
+                ((d[p * 4] >> 3) << 10) | ((d[p * 4 + 1] >> 3) << 5) | (d[p * 4 + 2] >> 3);
+              let v = lut[key];
+              if (v < 0) {
+                const r = e5(key >> 10),
+                  g = e5((key >> 5) & 31),
+                  b = e5(key & 31);
+                let bd = 1e9;
+                for (let i = 0; i < pal.length; i++) {
+                  const dd = (pal[i][0] - r) ** 2 + (pal[i][1] - g) ** 2 + (pal[i][2] - b) ** 2;
+                  if (dd < bd) {
+                    bd = dd;
+                    v = i;
+                  }
+                }
+                lut[key] = v;
+              }
+              ix[p] = v;
+            }
+            parts.push(
+              new Uint8Array([0x21, 0xf9, 4, 4, delay & 255, delay >> 8, 0, 0]),
+              new Uint8Array([0x2c, 0, 0, 0, 0, w & 255, w >> 8, h & 255, h >> 8, 0, 8]),
+              gifBlocks(lzw(ix)),
+            );
+          }
+          parts.push(new Uint8Array([0x3b]));
+          dl(new Blob(parts, { type: "image/gif" }), "impact.gif");
+          st.textContent =
+            "GIF saved (" +
+            mv.frames.length +
+            " frames, " +
+            Math.round(100 / delay) +
+            " fps max for GIF).";
+        } catch (e) {
+          st.textContent = "GIF failed: " + e.message;
+        }
+        EXPB = false;
+      }
+      async function exportVideo() {
+        const mv = PMV;
+        if (!mv || EXPB) return;
+        const st = q("pst");
+        if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) {
+          st.textContent = "This browser cannot record video. Use the GIF download instead.";
+          return;
+        }
+        EXPB = true;
+        try {
+          const mime =
+              [
+                "video/mp4;codecs=avc1",
+                "video/webm;codecs=vp9",
+                "video/webm;codecs=vp8",
+                "video/webm",
+              ].find((t) => MediaRecorder.isTypeSupported(t)) || "",
+            fps = +q("pfps").value,
+            n = mv.frames.length,
+            c = document.createElement("canvas");
+          c.width = mv.w;
+          c.height = mv.h;
+          const g = c.getContext("2d");
+          g.putImageData(mv.frames[0], 0, 0);
+          const rec = new MediaRecorder(
+              c.captureStream(fps),
+              mime ? { mimeType: mime, videoBitsPerSecond: 8e6 } : { videoBitsPerSecond: 8e6 },
+            ),
+            chunks = [],
+            done = new Promise((r) => (rec.onstop = r));
+          rec.ondataavailable = (e) => e.data && e.data.size && chunks.push(e.data);
+          rec.start();
+          const t0 = performance.now();
+          let last = -1;
+          await new Promise((res) => {
+            const step = () => {
+              const k = Math.floor(((performance.now() - t0) * fps) / 1000);
+              if (k >= n) return res();
+              if (k !== last) {
+                last = k;
+                g.putImageData(mv.frames[k], 0, 0);
+                st.textContent = "Recording video at playback speed… " + (k + 1) + " / " + n;
+              }
+              setTimeout(step, 8);
+            };
+            step();
+          });
+          await new Promise((r) => setTimeout(r, 250));
+          rec.stop();
+          await done;
+          const type = rec.mimeType || mime || "video/webm";
+          dl(new Blob(chunks, { type }), "impact." + (type.includes("mp4") ? "mp4" : "webm"));
+          st.textContent = "Video saved.";
+        } catch (e) {
+          st.textContent = "Video failed: " + e.message;
+        }
+        EXPB = false;
+      }
+      q("mrec").onclick = recStart;
+      q("mstop").onclick = () => {
+        if (REC) REC.stop = true;
+      };
+      q("mcl").onclick = () => {
+        MOVS = [];
+        q("movs").innerHTML = "";
+        q("mb").hidden = true;
+        PMV = null;
+      };
+      q("pfps").oninput = updPlayLbl;
+      q("pfr").oninput = () => {
+        PIDX = +q("pfr").value;
+        PRUN = false;
+        q("ppl").textContent = "Play";
+      };
+      q("ppl").onclick = () => {
+        PRUN = !PRUN;
+        q("ppl").textContent = PRUN ? "Pause" : "Play";
+      };
+      q("pcl").onclick = () => (q("mb").hidden = true);
+      q("pdel").onclick = () => {
+        if (!PMV) return;
+        MOVS = MOVS.filter((m) => m !== PMV);
+        PMV.card && PMV.card.remove();
+        PMV = null;
+        q("mb").hidden = true;
+      };
+      q("pgif").onclick = exportGif;
+      q("pvid").onclick = exportVideo;
+      function setTheme(v) {
+        document.body.classList.toggle("dk", v == "k");
+        q("thm").value = v;
+        try {
+          localStorage.setItem("sfs_theme", v);
+        } catch (e) {}
+      }
+      q("thm").onchange = () => setTheme(q("thm").value);
+      try {
+        setTheme(localStorage.getItem("sfs_theme") == "k" ? "k" : "w");
+      } catch (e) {}
+      q("rv").onclick = () => {
+        AF.checked = false;
+        px = py = 0;
+        zoom = 1;
+      };
+      document.querySelectorAll(".tab").forEach((b) => (b.onclick = () => tab(b.dataset.t)));
+      addEventListener("keydown", (e) => {
+        if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) || e.ctrlKey || e.metaKey || e.altKey)
+          return;
+        if (e.code == "Space") {
+          e.preventDefault();
+          q("pl").click();
+        } else if (e.key == "r") q("rs").click();
+        else if (e.key == "s") q("sn").click();
+        else if (e.key == "f") AF.click();
+      });
+      ["pointerdown", "pointermove", "wheel", "input", "change", "keydown", "resize"].forEach((e) =>
+        addEventListener(
+          e,
+          () => {
+            ACT = performance.now();
+          },
+          { passive: true },
+        ),
+      );
+      rs();
+      applyPre();
+      upd();
+      frame();
+    </script>
+  </body>
+</html>
