@@ -938,6 +938,11 @@
       .hd .hdl h1 {
         flex: none;
       }
+      .hd h1 a.home {
+        color: inherit;
+        text-decoration: none;
+        outline-offset: 3px;
+      }
       /* ---- save / load ---- */
       .svrow {
         display: flex;
@@ -1339,7 +1344,7 @@
     <div class="container">
       <header class="hd">
         <div class="hdl">
-          <h1>StarryFlameSPH</h1>
+          <h1><a class="home" href="StarryFlameSPH.html">StarryFlameSPH</a></h1>
           <button id="homeb" type="button" title="Back to the StarryFlameAstroTools main page" onclick="location.href = 'index.html'">Main Page</button>
         </div>
         <div class="seg" id="modes" role="group" aria-label="Mode">
