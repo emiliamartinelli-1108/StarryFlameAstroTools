@@ -927,6 +927,17 @@
       .hd h1 {
         flex: 1;
       }
+      .hdl {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        flex-wrap: wrap;
+      }
+      .hd .hdl h1 {
+        flex: none;
+      }
       /* ---- save / load ---- */
       .svrow {
         display: flex;
@@ -1327,7 +1338,10 @@
   <body>
     <div class="container">
       <header class="hd">
-        <h1>StarryFlameSPH</h1>
+        <div class="hdl">
+          <h1>StarryFlameSPH</h1>
+          <button id="homeb" type="button" title="Back to the StarryFlameAstroTools main page" onclick="location.href = 'index.html'">Main Page</button>
+        </div>
         <div class="seg" id="modes" role="group" aria-label="Mode">
           <button type="button" data-m="sc" class="on">Scenarios</button>
           <button type="button" data-m="sb">Sandbox</button>
