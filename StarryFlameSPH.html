@@ -656,14 +656,19 @@
         }
       }
       /* desktop and laptop: three-column app layout that fits the window */
-      @media (min-width: 1100px) and (min-height: 560px) {
+      @media (min-width: 1000px) and (min-height: 560px) {
         html,
         body {
           height: 100%;
           overflow: hidden;
         }
+        /* the body's min-height is 100vh, which on iPad Safari is the height with the toolbars hidden: taller than the visible page, so the bottom row
+           (Pause, Restart, Reset ...) ended up under the toolbar with overflow hidden and no way to scroll to it. Use the real visible height instead. */
         body {
           padding: 8px;
+          min-height: 0;
+          height: 100vh;
+          height: 100dvh;
         }
         .container {
           display: grid;
@@ -1202,7 +1207,7 @@
         border-radius: 50% !important;
       }
       /* desktop: two columns now that the side panel is gone */
-      @media (min-width: 1100px) and (min-height: 560px) {
+      @media (min-width: 1000px) and (min-height: 560px) {
         .container {
           grid-template-columns: minmax(0, 1fr) minmax(340px, 420px) !important;
         }
