@@ -223,6 +223,10 @@
       body.dk .info-row:nth-child(even) { background: #121212; }
       body.dk .fbody h3 { color: #6f8fff; }
       body.dk .soon .info-label { color: #fff; }
+      /* tablets in portrait: the stacked preview would otherwise fill the whole width and be taller than the screen */
+      @media (min-width: 601px) and (max-width: 900px) {
+        .thumb { aspect-ratio: 5 / 4; max-width: 520px; }
+      }
       body.dk .thumb { border-color: #3a3a3a; }
       body.dk .txt b, body.dk .list b, body.dk .hero b { color: #fff; }
       body.dk button, body.dk .btn { background: #1a1a1a; border-color: #444; color: #fff; }

@@ -938,6 +938,44 @@
       .hd .hdl h1 {
         flex: none;
       }
+      .hd .hdl h1 {
+        white-space: nowrap;
+      }
+      #homeb {
+        white-space: nowrap;
+        flex: none;
+      }
+      .hdl {
+        flex: 1 1 auto;
+        flex-wrap: nowrap;
+        min-width: max-content;
+      }
+      /* phones and small tablets: title row on its own, then mode / tour / theme controls, so nothing overlaps or wraps inside a button */
+      @media (max-width: 760px) {
+        .hd {
+          row-gap: 8px;
+        }
+        .hd .hdl {
+          flex: 1 1 100%;
+        }
+        .hd {
+          justify-content: flex-start;
+        }
+        .hd select {
+          flex: 1 1 120px;
+          min-width: 120px;
+        }
+      }
+      /* iOS zooms the page when a field under 16px gets focus; keep real fields at 16px on touch screens (the layout font stays as is) */
+      @media (hover: none) and (pointer: coarse) {
+        body select,
+        body textarea,
+        body input[type="text"],
+        body input[type="number"],
+        body input[type="search"] {
+          font-size: 16px !important;
+        }
+      }
       .hd h1 a.home {
         font-size: inherit !important;
         line-height: inherit;
